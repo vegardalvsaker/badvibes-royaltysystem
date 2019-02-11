@@ -1,0 +1,27 @@
+<h1>{{ artist.name }}</h1>
+<ul>
+{% for utgivelse in artist.utgivelse_set.all %}
+    <li>{{ utgivelse.navn }}</li>
+{% endfor %}
+</ul>
+
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% if formdata %}
+<p>
+{{ formdata.katalognr }}
+{{ formdata.navn }}
+{{ formdata.dato}}
+</p>
+{% endif %}
+
+<form action="{% url 'artist' artist.id %}" method="post">
+{% csrf_token %}
+    <input type="text" name="katalognr" id="katalognr" placeholder="i.e BV001">
+    <input type="text" name="navn" id="navn" placeholder="Tittel på utgivelse">
+    <input type="date" name="utgittdato" id="utgittdato">
+    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+
+<input type="submit" value="Legg til utgivelse">
+</form>

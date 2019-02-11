@@ -1,0 +1,9 @@
+{% if artist_list %}
+    <ul>
+    {% for artist in artist_list %}
+        <li><a href="{% url 'artist' artist.id %}">{{ artist.name }} contract since: {{ artist.contract_since }} </a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No artists are available.</p>
+{% endif %}

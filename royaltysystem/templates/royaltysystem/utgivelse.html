@@ -1,0 +1,14 @@
+<h1>{{ utgivelse }} i periode: {{ periode }}</h1>
+
+<ul>
+    {% for rec in fysisk.data.avregning_detaljert_set.all %}
+    {% if rec.periode == "P1 2017" %}
+    <li>{{ rec.kilde }}</li>
+    {% endif %}
+    {% endfor %}
+    <h3>Totalt</h3>
+    <p>Antall solgte: {{ fysisk.sum.antall }}</p>
+    <p>Inntekter: {{ fysisk.sum.inntekter }}kr</p>
+    <p>Kostnader: {{ fysisk.sum.kostnader }}kr</p>
+    <p>Brutto: {{ fysisk.sum.brutto }}kr</p>
+</ul>
