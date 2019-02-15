@@ -29,7 +29,7 @@ class UtgivelseFormat(models.Model):
 
         return self.utgivelse.__str__() + " "+ self.format
 
-        
+
 class Avregning_Detaljert(models.Model):
     periode         = models.CharField(max_length=7)
     kilde           = models.CharField(max_length=20)
@@ -44,6 +44,7 @@ class Avregning_Detaljert(models.Model):
 
     def __str__(self):
         return self.utgivelseFormat.__str__() +" | " + self.periode +" | Kilde: "+ self.kilde
+
 
 class Avregning(models.Model):
     periode = models.CharField(max_length=7)

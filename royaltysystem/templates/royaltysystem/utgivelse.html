@@ -1,14 +1,107 @@
+
+{% include 'royaltysystem/partials/header.html' %}
+  <title>{{ utgivelse }} {{ periode}}</title>
+</head>
+<body>
 <h1>{{ utgivelse }} i periode: {{ periode }}</h1>
 
-<ul>
-    {% for rec in fysisk.data.avregning_detaljert_set.all %}
-    {% if rec.periode == "P1 2017" %}
-    <li>{{ rec.kilde }}</li>
-    {% endif %}
-    {% endfor %}
-    <h3>Totalt</h3>
-    <p>Antall solgte: {{ fysisk.sum.antall }}</p>
-    <p>Inntekter: {{ fysisk.sum.inntekter }}kr</p>
-    <p>Kostnader: {{ fysisk.sum.kostnader }}kr</p>
-    <p>Brutto: {{ fysisk.sum.brutto }}kr</p>
-</ul>
+<h4>Hei :{{ total.0.fysisksalg }}</h4>
+
+<div class="container">
+    <table class="table table-sm table-bordered text-center" id="fysiskTabell">
+        <thead>
+            <tr class="bg-dark text-light">
+                <th colspan="6" scope="col" class="text-center">Detaljert royaltyavregning for:<br>{{ utgivelse }} <br> {{ periode }}</th>
+            </tr>
+            <tr class="bg-dark text-light text-center">
+                <th colspan="6" scope="col">Oversikt diskett</th>
+            </tr>
+            <tr class="table-secondary">
+                <th colspan="2" class="table-secondary" scope="col">Kilde</th>
+                <th class="table-secondary" scope="col">Antall</th>
+                <th scope="col">Inntekter</th>
+                <th scope="col">Kostnader</th>
+                <th scope="col">Brutto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in fysisk.data %}
+            <tr>
+                <td colspan="2">{{ rec.kilde }}</td>
+                <td>{{ rec.antall }}</td>
+                <td>{{ rec.inntekter }} kr</td>
+                <td>{{ rec.kostnader }} kr</td>
+                <td>{{ rec.brutto }} kr</td>
+            </tr>
+            {% endfor %}
+            <tr class="font-weight-bold">
+                <td colspan="2">Sum</td>
+                <td>{{ fysisk.sum.antall }}</td>
+                <td>{{ fysisk.sum.inntekter }} kr</td>
+                <td>{{ fysisk.sum.kostnader }} kr</td>
+                <td>{{ fysisk.sum.brutto }} kr</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr class="bg-dark text-light">
+                <th colspan="6" class="text-center">Oversikt digital</th>
+            </tr>
+            <tr class="table-secondary">
+                <th colspan="2" scope="col">Kilde</th>
+                <th scope="col">DL utgivelse</th>
+                <th scope="col">DL spor</th>
+                <th scope="col">Streams</th>
+                <th scope="col">Brutto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for avrd in digital %}
+            <tr>
+                <td colspan="2">{{ avrd.kilde}}</td>
+                <td>{{ avrd.dl_utgivelse}}</td>
+                <td>{{ avrd.dl_spor}}</td>
+                <td>{{ avrd.streams}}</td>
+                <td>{{ avrd.brutto}} kr</td>
+            </tr>
+            {% endfor %}
+
+            <tr class="font-weight-bold">
+                <td colspan="2">Sum</td>
+                <td>1</td>
+                <td>0</td>
+                <td>4941</td>
+                <td>236.30 kr</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr class="bg-dark text-light text-center">
+                <th colspan="6">Total</th>
+            </tr>
+            <tr class="table-secondary">
+                <th scope="col">Avregning</th>
+                <th scope="col">Fysisk salg</th>
+                <th scope="col">DL utgivelse</th>
+                <th scope="col">DL spor</th>
+                <th scope="col">Streams</th>
+                <th scope="col">Brutto</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in total %}
+        {% if t.avregning == 'Totalt' %}
+            <tr class="font-weight-bold">
+        {% else %}    
+            <tr>
+        {% endif %}      
+                <td>{{ t.avregning }}</td>
+                <td>{{ t.fysisksalg }}</td>
+                <td>{{ t.DL_utgivelse }}</td>
+                <td>{{ t.DL_spor }}</td>
+                <td>{{ t.streams }}</td>
+                <td>{{ t.brutto }} kr</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include 'royaltysystem/partials/bottom.html' %}

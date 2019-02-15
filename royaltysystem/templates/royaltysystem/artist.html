@@ -1,7 +1,7 @@
 <h1>{{ artist.name }}</h1>
 <ul>
 {% for utgivelse in artist.utgivelse_set.all %}
-    <li>{{ utgivelse.navn }}</li>
+    <a href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode=P2+2018"><li>{{ utgivelse.navn }}</li></a>
 {% endfor %}
 </ul>
 
