@@ -1,4 +1,6 @@
 {% include 'royaltysystem/partials/header.html' %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'royaltysystem/css/style.css' %}">
 <title>{{ artist.name }}</title>
 </head>
 <body>
@@ -10,7 +12,7 @@
         <h3>{{ utgivelse.custom }}</h3>
         {% endfor %}
         <div class="container">
-            <table class="table table-sm table-bordered text-center">
+            <table class="table table-sm table-bordered table-striped text-center">
                 <thead>
                         <tr class="bg-dark text-light text-center">
                             <th colspan="9" rowspan="1" style="height: 80px !important;">Bad Vibes - oversikt over avregninger</th>
@@ -21,16 +23,16 @@
                     <tr class="bg-dark text-light text-center">
                         <th colspan="9" class="text-center"> {{ utgivelse }}</th>
                     </tr>
-                    <tr class="table-secondary">
-                        <th scope="col">Periode</th>
-                        <th scope="col">Bruttoinntekt</th>
-                        <th scope="col">B.inntekt akkum.</th>
-                        <th scope="col">Kostnader</th>
-                        <th scope="col">Kost. akkumulert</th>
-                        <th scope="col">Roy.prosent</th>
-                        <th scope="col">Nettoinntekt</th>
-                        <th scope="col">Akkumulert</th>
-                        <th scope="col">Label cut</th>
+                    <tr class="table-secondary ">
+                        <th class="headerDivider" scope="col">Periode</th>
+                        <th class="headerDivider" scope="col">Bruttoinntekt</th>
+                        <th class="headerDivider" scope="col">B.inntekt akkum.</th>
+                        <th class="headerDivider" scope="col">Kostnader</th>
+                        <th class="headerDivider" scope="col">Kost. akkumulert</th>
+                        <th class="headerDivider" scope="col">Roy.prosent</th>
+                        <th class="headerDivider"scope="col">Nettoinntekt</th>
+                        <th class="headerDivider" scope="col">Akkumulert</th>
+                        <th class="headerDivider" scope="col">Label cut</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,15 +40,15 @@
                 
                     <tr>
                         {% if avregning.utbetalt %}
-                        <td style="border-bottom-color: red !important">{{ avregning.periode }}</td>
-                        <td style="border-bottom-color: red !important">{{ avregning.bruttoinntekt }} kr</td>
-                        <td style="border-bottom-color: red !important">{{ avregning.bruttoinntekt_akkumulert }} kr</td>
-                        <td style="border-bottom-color: red !important">{{ avregning.kostnader }} kr</td>
-                        <td style="border-bottom-color: red !important">{{ avregning.kostnader_akkumulert }} kr</td>
-                        <td style="border-bottom-color: red !important">{{ utgivelse.royalty_prosent }}%</td>
-                        <td style="border-bottom-color: red !important">{{ avregning.nettoinntekt }} kr</td>
-                        <td style="border-bottom-color: red !important">{{ avregning.nettoinntekt_akkumulert }} kr</td>
-                        <td style="border-bottom-color: red !important">{{ avregning.labelcut }} kr</td>
+                        <td class="utbetalt">{{ avregning.periode }}</td>
+                        <td class="utbetalt">{{ avregning.bruttoinntekt }} kr</td>
+                        <td class="utbetalt">{{ avregning.bruttoinntekt_akkumulert }} kr</td>
+                        <td class="utbetalt">{{ avregning.kostnader }} kr</td>
+                        <td class="utbetalt">{{ avregning.kostnader_akkumulert }} kr</td>
+                        <td class="utbetalt">{{ utgivelse.royalty_prosent }}%</td>
+                        <td class="utbetalt">{{ avregning.nettoinntekt }} kr</td>
+                        <td class="utbetalt">{{ avregning.nettoinntekt_akkumulert }} kr</td>
+                        <td class="utbetalt">{{ avregning.labelcut }} kr</td>
                         {% else %}
                         <td>{{ avregning.periode }}</td>
                         <td>{{ avregning.bruttoinntekt }} kr</td>
@@ -60,6 +62,17 @@
                         {% endif %}
                     </tr>
                     {% endfor %}
+                    <tr class="font-weight-bold">
+                        <td class="totalt">Totalt</td>
+                        <td class="totalt">{{ utgivelse.totalt.bruttoinntekt }} kr</td>
+                        <td class="totalt">{{ utgivelse.totalt.bruttoinntekt_akkumulert }} kr</td>
+                        <td class="totalt">{{ utgivelse.totalt.kostnader }} kr</td>
+                        <td class="totalt">{{ utgivelse.totalt.kostnader_akkumulert }} kr</td>
+                        <td class="totalt">{{ utgivelse.royalty_prosent}}%</td>
+                        <td class="totalt">{{ utgivelse.totalt.nettoinntekt }} kr</td>
+                        <td class="totalt">{{ utgivelse.totalt.nettoinntekt_akkumulert }} kr</td>
+                        <td class="totalt">{{ utgivelse.totalt.labelcut }} kr</td>
+                    </tr>
                 </tbody>
                 {% endfor %}
             </table>   

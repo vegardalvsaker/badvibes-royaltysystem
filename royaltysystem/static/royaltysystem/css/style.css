@@ -1,4 +1,16 @@
 .utbetalt {
     border-bottom-color: red !important;
-    border-bottom-style: dotted !important;
+}
+
+.totalt {
+    border-color: black !important;
+}
+
+#teststring {
+    color: aqua;
+}
+
+.headerDivider {
+    border-bottom-color: black !important;
+    border-bottom-width: 5px !important;
 }
