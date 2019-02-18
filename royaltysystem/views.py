@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
+from django.urls import reverse
+
 
 from .models import Artist, Utgivelse
 
@@ -25,25 +27,38 @@ class IndexView(generic.ListView):
         """Return all Artists"""
         return Artist.objects.all()
 
-class ArtistView(generic.DetailView):
-    model = Artist
-    template_name = 'royaltysystem/artist.html'
-
-    """
-    formdata = {}
-    if request.POST:
-        formdata = {
-            'katalognr': request.POST['katalognr'],
-            'navn': request.POST['navn'],
-            'dato': request.POST['utgittdato']
-        }
-
+def artist(request, artist_id):
     art = get_object_or_404(Artist, pk=artist_id)    
-    if formdata:
-        context = {'formdata': formdata, 'artist': art}
-    else:
-        context = {'artist': art}
-    return render(request, 'royaltysystem/artist.html', context)"""
+
+    art.utgivelser = []
+    for i, ut in enumerate(art.utgivelse_set.all()):
+        ut.avregninger = []
+        
+        for j, avregning in enumerate(ut.avregning_set.all()):
+            nettoinntekt = round(avregning.bruttoinntekt - avregning.kostnader, 2)
+            if nettoinntekt < 0:
+                avregning.nettoinntekt = nettoinntekt
+                avregning.labelcut = nettoinntekt
+            else:
+                avregning.nettoinntekt = round(nettoinntekt * (ut.royalty_prosent / 100), 2)
+                avregning.labelcut     = round(avregning.bruttoinntekt-avregning.nettoinntekt, 2)
+            if j == 0 or ut.avregninger[j-1].utbetalt:
+                avregning.bruttoinntekt_akkumulert  = avregning.bruttoinntekt
+                avregning.kostnader_akkumulert      = avregning.kostnader
+                avregning.nettoinntekt_akkumulert   = round(avregning.nettoinntekt, 2)
+            else:
+                avregning.bruttoinntekt_akkumulert  = avregning.bruttoinntekt + ut.avregninger[j-1].bruttoinntekt_akkumulert
+                avregning.kostnader_akkumulert      = avregning.kostnader + ut.avregninger[j-1].kostnader_akkumulert
+                avregning.nettoinntekt_akkumulert   = round(avregning.nettoinntekt + ut.avregninger[j-1].nettoinntekt_akkumulert, 2)
+            
+            ut.avregninger.append(avregning)
+        art.utgivelser.append(ut)
+
+    context = {
+        'artist': art
+    }
+
+    return render(request, 'royaltysystem/artist.html', context)
 
 
 def nyutgivelse(request, artist_id):
@@ -59,27 +74,55 @@ def utgivelse(request, artist_id, katalognr):
     fysisk  = fysisk_format.avregning_detaljert_set.filter(periode__startswith=periode)
     digital = utgivelsen.utgivelseformat_set.filter(format__startswith='Digital')[0].avregning_detaljert_set.filter(periode__startswith=periode)
 
-    total = kalkulerTotal(periode, utgivelsen)
-    fysisk_sum = kalkulerFysiskSum(fysisk_format, periode)
+    fysisk_sum = kalkuler_fysisk_sum(fysisk_format, periode)
+    digital_sum = kalkuler_digital_sum(digital)
+
+    total_akkumulert = kalkuler_total_akkumulert(periode, utgivelsen)
+
+    total_denne = Total_Row('Denne', fysisk_sum['antall'],
+                            digital_sum['dl_utgivelse'], digital_sum['dl_spor'],
+                            digital_sum['streams'],
+                            fysisk_sum['brutto'] + digital_sum['brutto'])
+
+    total_totalt = Total_Row('Totalt',
+                             total_akkumulert.fysisksalg + total_denne.fysisksalg,
+                             total_akkumulert.DL_utgivelse + total_denne.DL_utgivelse,
+                             total_akkumulert.DL_spor + total_denne.DL_spor,
+                             total_akkumulert.streams + total_denne.streams,
+                             total_akkumulert.brutto + total_denne.brutto)
+
+    total = [total_akkumulert, total_denne, total_totalt]
+    neste_periode = PERIODS[get_periode_index(periode)+1]
+    if neste_periode is "P1 2017":
+        forrige_periode = "P2 2016"
+    else:
+        forrige_periode = PERIODS[get_periode_index(periode)-1]
+    
     context = {
         'periode': periode,
-        'perioder': PERIODS,
+        'forrige_periode': forrige_periode,
+        'neste_periode': neste_periode,
         'utgivelse': utgivelsen,
         'fysisk': {
             'data': fysisk,
             'sum': fysisk_sum
             },
-        'digital': digital,
+        'digital': {
+            'data': digital,
+            'sum': digital_sum
+            },
         'total': total
     }
     return render(request, 'royaltysystem/utgivelse.html/', context)
 
 
-def kalkulerFysiskSum(fysisk, periode):
+def kalkuler_fysisk_sum(fysisk, periode):
     fysisk_liste = fysisk.avregning_detaljert_set.filter(periode__startswith=periode)
-    antall    = sum(a.antall for a in fysisk_liste)
-    inntekter = sum(a.inntekter for a in fysisk_liste)
-    kostnader = sum(a.kostnader for a in fysisk_liste)
+
+    antall    = sum(filter(None, (a.antall for a in fysisk_liste)))
+    inntekter = sum(filter(None, (a.inntekter for a in fysisk_liste)))
+
+    kostnader = sum(filter(None, (a.kostnader for a in fysisk_liste)))
 
     return {
         'antall': antall,
@@ -88,9 +131,10 @@ def kalkulerFysiskSum(fysisk, periode):
         'brutto': inntekter-kostnader
     }
 
-##Finn index til periode. Summer all bruttoen til både fysisk og digital fra første periode, til og med til nåverende periode
+##Finn index til periode. Summer all bruttoen til både fysisk og digital fra første periode,
+#  til og med til nåverende periode
 
-def kalkulerTotal(periode, utgivelse):
+def kalkuler_total_akkumulert(periode, utgivelse):
     fysisk_format = utgivelse.utgivelseformat_set.filter(format__startswith='Fysisk')[0]
     digital_avregning_detaljert_list = utgivelse.utgivelseformat_set.filter(format__startswith='Digital')[0].avregning_detaljert_set.all()
 
@@ -100,27 +144,54 @@ def kalkulerTotal(periode, utgivelse):
             current_period_index = k
 
     brutto = 0
+    streams = 0
+    dl_spor = 0
+    dl_utgivelse = 0
+    fysisk_salg = 0
 
-    for i in range(current_period_index+1):
-        brutto += kalkulerFysiskSum(fysisk_format, PERIODS[i])['brutto']
+    for i in range(current_period_index):
+        fysisk_sum = kalkuler_fysisk_sum(fysisk_format, PERIODS[i])
+        brutto += fysisk_sum['brutto']
+        fysisk_salg += fysisk_sum['antall']
 
     for j, a in enumerate(digital_avregning_detaljert_list):
-        if a.periode == PERIODS[current_period_index+2]:
+        if a.periode == PERIODS[current_period_index]:
             break
         else:
-            brutto += a.brutto
+            if a.brutto is not None:
+                brutto += a.brutto
+            if a.dl_spor is not None:
+                dl_spor += a.dl_spor
+            if a.dl_utgivelse is not None:
+                dl_utgivelse += a.dl_utgivelse
+            if a.streams is not None:
+                streams += a.streams
 
-    akkumulert = Total_Row('Akkumulert',13, 1, 0, 8089, 1302.43)
-    denne = Total_Row('Denne',3, 0, 0, 162, 251.83)
-    totalt = Total_Row('Totalt',
-        akkumulert.fysisksalg + denne.fysisksalg,
-        akkumulert.DL_utgivelse + denne.DL_utgivelse,
-        akkumulert.DL_spor + denne.DL_spor,
-        akkumulert.streams + denne.streams,
-        akkumulert.brutto + denne.brutto)
-    total = [akkumulert, denne, totalt]    
+    akkumulert = Total_Row('Akkumulert', fysisk_salg, dl_utgivelse, dl_spor, streams, brutto)
+    return akkumulert
 
-    return total
+def kalkuler_digital_sum(digital_liste):
+    DL_utgivelse = sum(filter(None, (d.dl_utgivelse for d in digital_liste)))
+    DL_spor = sum(filter(None, (d.dl_spor for d in digital_liste)))
+    streams = sum(filter(None, (d.streams for d in digital_liste)))
+    brutto = sum(filter(None, (d.brutto for d in digital_liste)))
+
+    digital_sum = {
+        'kilde': 'Sum',
+        'dl_utgivelse': DL_utgivelse,
+        'dl_spor': DL_spor,
+        'streams': streams,
+        'brutto': brutto
+    }
+
+    return digital_sum
+
+def get_periode_index(periode):
+    current_period_index = 0
+    for k in PERIODS:
+        if PERIODS[k] == periode:
+            current_period_index = k
+    return current_period_index
 
 class Total_Row(object):
     avregning = ""

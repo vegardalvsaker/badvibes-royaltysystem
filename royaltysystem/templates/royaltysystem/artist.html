@@ -1,27 +1,69 @@
-<h1>{{ artist.name }}</h1>
-<ul>
-{% for utgivelse in artist.utgivelse_set.all %}
-    <a href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode=P2+2018"><li>{{ utgivelse.navn }}</li></a>
-{% endfor %}
-</ul>
-
-
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-{% if formdata %}
-<p>
-{{ formdata.katalognr }}
-{{ formdata.navn }}
-{{ formdata.dato}}
-</p>
-{% endif %}
-
-<form action="{% url 'artist' artist.id %}" method="post">
-{% csrf_token %}
-    <input type="text" name="katalognr" id="katalognr" placeholder="i.e BV001">
-    <input type="text" name="navn" id="navn" placeholder="Tittel på utgivelse">
-    <input type="date" name="utgittdato" id="utgittdato">
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-
-<input type="submit" value="Legg til utgivelse">
-</form>
+{% include 'royaltysystem/partials/header.html' %}
+<title>{{ artist.name }}</title>
+</head>
+<body>
+    <h1>{{ artist.name }}</h1>
+    <ul>
+        <!--<h5>{{ artist.custom }}</h5>-->
+        {% for utgivelse in artist.utgivelser %}
+        <a href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode=P1+2017"><li>{{ utgivelse.navn }}</li></a>
+        <h3>{{ utgivelse.custom }}</h3>
+        {% endfor %}
+        <div class="container">
+            <table class="table table-sm table-bordered text-center">
+                <thead>
+                        <tr class="bg-dark text-light text-center">
+                            <th colspan="9" rowspan="1" style="height: 80px !important;">Bad Vibes - oversikt over avregninger</th>
+                        </tr>
+                        
+                
+                    {% for utgivelse in artist.utgivelser %}
+                    <tr class="bg-dark text-light text-center">
+                        <th colspan="9" class="text-center"> {{ utgivelse }}</th>
+                    </tr>
+                    <tr class="table-secondary">
+                        <th scope="col">Periode</th>
+                        <th scope="col">Bruttoinntekt</th>
+                        <th scope="col">B.inntekt akkum.</th>
+                        <th scope="col">Kostnader</th>
+                        <th scope="col">Kost. akkumulert</th>
+                        <th scope="col">Roy.prosent</th>
+                        <th scope="col">Nettoinntekt</th>
+                        <th scope="col">Akkumulert</th>
+                        <th scope="col">Label cut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for avregning in utgivelse.avregninger %}
+                
+                    <tr>
+                        {% if avregning.utbetalt %}
+                        <td style="border-bottom-color: red !important">{{ avregning.periode }}</td>
+                        <td style="border-bottom-color: red !important">{{ avregning.bruttoinntekt }} kr</td>
+                        <td style="border-bottom-color: red !important">{{ avregning.bruttoinntekt_akkumulert }} kr</td>
+                        <td style="border-bottom-color: red !important">{{ avregning.kostnader }} kr</td>
+                        <td style="border-bottom-color: red !important">{{ avregning.kostnader_akkumulert }} kr</td>
+                        <td style="border-bottom-color: red !important">{{ utgivelse.royalty_prosent }}%</td>
+                        <td style="border-bottom-color: red !important">{{ avregning.nettoinntekt }} kr</td>
+                        <td style="border-bottom-color: red !important">{{ avregning.nettoinntekt_akkumulert }} kr</td>
+                        <td style="border-bottom-color: red !important">{{ avregning.labelcut }} kr</td>
+                        {% else %}
+                        <td>{{ avregning.periode }}</td>
+                        <td>{{ avregning.bruttoinntekt }} kr</td>
+                        <td>{{ avregning.bruttoinntekt_akkumulert }} kr</td>
+                        <td>{{ avregning.kostnader }} kr</td>
+                        <td>{{ avregning.kostnader_akkumulert }} kr</td>
+                        <td>{{ utgivelse.royalty_prosent }}%</td>
+                        <td>{{ avregning.nettoinntekt }} kr</td>
+                        <td>{{ avregning.nettoinntekt_akkumulert }} kr</td>
+                        <td>{{ avregning.labelcut }} kr</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% endfor %}
+            </table>   
+        </div>
+    
+    </ul>
+{% include 'royaltysystem/partials/bottom.html' %}

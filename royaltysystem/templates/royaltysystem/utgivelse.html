@@ -1,9 +1,13 @@
 
 {% include 'royaltysystem/partials/header.html' %}
   <title>{{ utgivelse }} {{ periode}}</title>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 </head>
 <body>
 <h1>{{ utgivelse }} i periode: {{ periode }}</h1>
+
+<a href="{% url 'utgivelse' 2 utgivelse.katalognr %}?periode={{ forrige_periode }}">Forrige periode</a>
 
 <h4>Hei :{{ total.0.fysisksalg }}</h4>
 
@@ -55,7 +59,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for avrd in digital %}
+            {% for avrd in digital.data %}
             <tr>
                 <td colspan="2">{{ avrd.kilde}}</td>
                 <td>{{ avrd.dl_utgivelse}}</td>
@@ -67,10 +71,10 @@
 
             <tr class="font-weight-bold">
                 <td colspan="2">Sum</td>
-                <td>1</td>
-                <td>0</td>
-                <td>4941</td>
-                <td>236.30 kr</td>
+                <td>{{ digital.sum.dl_utgivelse }}</td>
+                <td>{{ digital.sum.dl_spor }}</td>
+                <td>{{ digital.sum.streams }}</td>
+                <td>{{ digital.sum.brutto }} kr</td>
             </tr>
         </tbody>
         <thead>
@@ -104,4 +108,6 @@
         </tbody>
     </table>
 </div>
+<h5 class="utbetalt">HASDASD</h5>
+<div style="height: 100px" class="utbetalt">Ronny</div>
 {% include 'royaltysystem/partials/bottom.html' %}
