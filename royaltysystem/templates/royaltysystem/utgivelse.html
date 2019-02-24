@@ -7,11 +7,11 @@
 <body>
 <h1>{{ utgivelse }} i periode: {{ periode }}</h1>
 
-<a href="{% url 'utgivelse' 2 utgivelse.katalognr %}?periode={{ forrige_periode }}">Forrige periode</a>
 
-<h4>Hei :{{ total.0.fysisksalg }}</h4>
 
 <div class="container">
+        <a class="btn btn-secondary" href="{% url 'utgivelse' artist_id utgivelse.katalognr %}?periode={{ forrige_periode }}">Forrige periode</a>
+        <a class="btn btn-secondary float-right"href="{% url 'utgivelse' artist_id utgivelse.katalognr %}?periode={{ neste_periode }}">Neste periode</a>
     <table class="table table-sm table-bordered text-center" id="fysiskTabell">
         <thead>
             <tr class="bg-dark text-light">
@@ -108,6 +108,4 @@
         </tbody>
     </table>
 </div>
-<h5 class="utbetalt">HASDASD</h5>
-<div style="height: 100px" class="utbetalt">Ronny</div>
 {% include 'royaltysystem/partials/bottom.html' %}

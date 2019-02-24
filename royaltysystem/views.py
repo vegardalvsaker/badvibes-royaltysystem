@@ -3,24 +3,12 @@ from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.urls import reverse
 
+import pdb;
 
 from .models import Artist, Utgivelse, Periode
 
 PERIODS = Periode.objects.all()
-"""
-PERIODS = {
-        0: 'P2 2016',
-        1: 'P1 2017',
-        2: 'P2 2017',
-        3: 'P1 2018',
-        4: 'P2 2018',
-        5: 'P1 2019',
-        6: 'P2 2019',
-        7: 'P1 2020',
-        8: 'P2 2020',
-        9: 'P1 2020'
-        }
-"""
+
 class IndexView(generic.ListView):
     template_name = 'royaltysystem/index.html'
     context_object_name = 'artist_list'
@@ -145,6 +133,7 @@ def utgivelse(request, artist_id, katalognr):
         neste_periode = PERIODS[current_periode_index+1].periode
     
     context = {
+        'artist_id': artist_id,
         'periode': periode,
         'forrige_periode': forrige_periode,
         'neste_periode': neste_periode,
@@ -184,43 +173,42 @@ def kalkuler_total_akkumulert(periode, utgivelse):
     fysisk_format = utgivelse.utgivelseformat_set.filter(format__startswith='Fysisk')[0]
     digital_avregning_detaljert_list = utgivelse.utgivelseformat_set.filter(format__startswith='Digital')[0].avregning_detaljert_set.all()
 
-    current_period_index = 0
+    current_periode_index = 0
     for i, k in enumerate(PERIODS):
-        if k.periode is periode:
-            current_period_index = i
+        if k.periode == periode:
+            current_periode_index = i
 
     brutto = 0
     streams = 0
     dl_spor = 0
     dl_utgivelse = 0
     fysisk_salg = 0
-
-    active_period_indices = []
-    for i, d in enumerate(digital_avregning_detaljert_list):
-        for j, p in enumerate(PERIODS):
-            if d.periode == p.periode:
-                 active_period_indices.append(j)
-    myset = set(active_period_indices)
-    start = myset.pop()
+    
+    first_periode, last_periode = get_active_periode_indices(digital_avregning_detaljert_list)
 
 
-    for i in enumerate(range(current_period_index), start+1):
-        fysisk_sum = kalkuler_fysisk_sum(fysisk_format, PERIODS[i].periode)
-        brutto += fysisk_sum['brutto']
-        fysisk_salg += fysisk_sum['antall']
 
-    for j, a in enumerate(digital_avregning_detaljert_list):
-        if a.periode == PERIODS[current_period_index].periode:
-            break
-        else:
-            if a.brutto is not None:
-                brutto += a.brutto
-            if a.dl_spor is not None:
-                dl_spor += a.dl_spor
-            if a.dl_utgivelse is not None:
-                dl_utgivelse += a.dl_utgivelse
-            if a.streams is not None:
-                streams += a.streams
+    ##pdb.set_trace()
+    ##Sjekker at perioden er innenfor utgivelsens første og siste periode.
+    if current_periode_index >= first_periode and current_periode_index <= last_periode:
+        for i in range(first_periode, current_periode_index):
+            
+            fysisk_sum = kalkuler_fysisk_sum(fysisk_format, PERIODS[i].periode)
+            brutto += fysisk_sum['brutto']
+            fysisk_salg += fysisk_sum['antall']
+
+        for j, a in enumerate(digital_avregning_detaljert_list):
+            if a.periode == PERIODS[current_periode_index].periode:
+                break
+            else:
+                if a.brutto is not None:
+                    brutto += a.brutto
+                if a.dl_spor is not None:
+                    dl_spor += a.dl_spor
+                if a.dl_utgivelse is not None:
+                    dl_utgivelse += a.dl_utgivelse
+                if a.streams is not None:
+                    streams += a.streams
 
     akkumulert = Total_Row('Akkumulert', fysisk_salg, dl_utgivelse, dl_spor, streams, brutto)
     return akkumulert
@@ -241,6 +229,32 @@ def kalkuler_digital_sum(digital_liste):
 
     return digital_sum
 
+def get_active_periode_indices(avregning_detaljert_list):
+    """
+    Finds the index of the first and last period of the utgivelse
+
+    Parameters:
+    avregning_detaljert_list (list): List of avregning_detaljert-objects
+
+    Returns:
+    int: Index of first period, index of last period
+    """
+    active_period_indices = []
+    for _, d in enumerate(avregning_detaljert_list):
+        for j, p in enumerate(PERIODS):
+            if d.periode == p.periode:
+                active_period_indices.append(j)
+    myset = set(active_period_indices)
+    first_periode = myset.pop()
+    last_periode = max(myset)
+    return first_periode, last_periode
+
+def get_current_periode(periode):
+    current_periode_index = None
+    for i, k in enumerate(PERIODS):
+        if k.periode == periode:
+            current_periode_index = i
+    return current_periode_index
 
 class Total_Row(object):
     avregning = ""
