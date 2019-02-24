@@ -22,12 +22,18 @@ def testview(request):
 
 def artist(request, artist_id):
     art = get_object_or_404(Artist, pk=artist_id)    
-
     art.utgivelser = []
     for i, ut in enumerate(art.utgivelse_set.all()):
         ut.avregninger = []
-        ut.totalt = {
-        }
+        ut.totalt = {}
+        ut.perioder = []
+        if len(ut.utgivelseformat_set.all()) > 0: 
+            avregning_detaljert_list = ut.utgivelseformat_set.all()[0].avregning_detaljert_set.all()
+            start, stop = get_active_periode_indices(avregning_detaljert_list)
+
+            for _, l in enumerate(range(start, stop)):
+                ut.perioder.append(PERIODS[l].periode)
+
         for j, avregning in enumerate(ut.avregning_set.all()):
             nettoinntekt = round(avregning.bruttoinntekt - avregning.kostnader, 2)
 
@@ -47,11 +53,11 @@ def artist(request, artist_id):
                 avregning.bruttoinntekt_akkumulert  = avregning.bruttoinntekt + ut.avregninger[j-1].bruttoinntekt_akkumulert
                 avregning.kostnader_akkumulert      = avregning.kostnader + ut.avregninger[j-1].kostnader_akkumulert
                 if (ut.avregninger[j-1].nettoinntekt_akkumulert + nettoinntekt) < 0:
-                    avregning.nettoinntekt = nettoinntekt
-                    avregning.labelcut = nettoinntekt
+                    avregning.nettoinntekt  = nettoinntekt
+                    avregning.labelcut      = nettoinntekt
                 else:
-                    avregning.nettoinntekt              = round(nettoinntekt * (ut.royalty_prosent / 100), 2) 
-                    avregning.labelcut = avregning.bruttoinntekt - avregning.nettoinntekt
+                    avregning.nettoinntekt  = round(nettoinntekt * (ut.royalty_prosent / 100), 2) 
+                    avregning.labelcut      = avregning.bruttoinntekt - avregning.nettoinntekt
                 avregning.nettoinntekt_akkumulert   = round(avregning.nettoinntekt + ut.avregninger[j-1].nettoinntekt_akkumulert, 2)
 
 

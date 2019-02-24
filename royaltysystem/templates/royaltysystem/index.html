@@ -1,9 +1,32 @@
-{% if artist_list %}
-    <ul>
-    {% for artist in artist_list %}
-        <li><a href="{% url 'artist' artist.id %}">{{ artist.name }} contract since: {{ artist.contract_since }} </a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No artists are available.</p>
-{% endif %}
+{% include 'royaltysystem/partials/header.html' %}
+  <title>Bad Vibes royalty system</title>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'royaltysystem/css/style.css' %}">
+</head>
+<body>
+ {% include 'royaltysystem/partials/navbar.html' %}       
+    <div class="container">
+        {% if artist_list %}
+        <div class="row">
+        {% for artist in artist_list %}
+            <a class="btn col-6 text-left mb-2" href="{% url 'artist' artist.id %}">{{ artist.name }} contract since: {{ artist.contract_since }} <span data-toggle="tooltip" data-placement="top" title="Antall utgivelser" class="badge badge-secondary">4</span></a>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p>No artists are available.</p>
+    {% endif %}
+    <button class="btn btn-success mb-2" id="add" data-toggle="collapse" data-target="#collapseExample" type="button" aria-expanded="false" aria-constrols="collapseExample">Legg til ny artist</button>
+    <div class="collapse" id="collapseExample">
+        <form class="form-inline" action="{% url 'index' %}">
+            <label class="sr-only" for="artistInput">Artistnavn</label>
+            <input type="text" class="form-control mb-2 mr-sm-2" id="artistInput" placeholder="Artistnavn...">
+            
+            <label class="sr-only" for="dateInput">Kontrakt signert</label>
+            <input type="date" id="dateInput" class="form-control mb-2 mr-sm-2">
+            
+            <button type="submit" class="btn mb-2 btn-sm btn-primary">Legg til</button>
+        </form>
+    </div>
+</div>
+
+{% include 'royaltysystem/partials/bottom.html' %}

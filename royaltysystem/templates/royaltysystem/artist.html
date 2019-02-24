@@ -4,14 +4,25 @@
 <title>{{ artist.name }}</title>
 </head>
 <body>
-    <h1>{{ artist.name }}</h1>
+    {% include 'royaltysystem/partials/navbar.html' %}
+    <div class="container">
+    <h1 class="text-center">{{ artist.name }}</h1>
     <ul>
-        <!--<h5>{{ artist.custom }}</h5>-->
-        {% for utgivelse in artist.utgivelser %}
-        <a href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode=P1+2017"><li>{{ utgivelse.navn }}</li></a>
-        <h3>{{ utgivelse.custom }}</h3>
-        {% endfor %}
-        <div class="container">
+        <h4>Utgivelser:</h4>
+        <div class="row">
+            {% for utgivelse in artist.utgivelser %}
+            <div class="dropdown show col-3 mb-5">
+                    <button class="btn btn-sm btn-secondary dropdown-toggle" href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode=P1+2017" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ utgivelse.katalognr }} {{ utgivelse.navn }}
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    {% for periode in utgivelse.perioder %}  
+                    <a class="dropdown-item" href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode={{ periode }}">{{ periode }}</a>
+                    {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
             <table class="table table-sm table-bordered table-striped text-center">
                 <thead>
                         <tr class="bg-dark text-light text-center">
