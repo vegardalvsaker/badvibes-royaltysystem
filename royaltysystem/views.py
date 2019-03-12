@@ -1,7 +1,9 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.urls import reverse
+from django.db import IntegrityError
+from django.contrib import messages
 
 import pdb;
 
@@ -9,16 +11,27 @@ from .models import Artist, Utgivelse, Periode
 
 PERIODS = Periode.objects.all()
 
-class IndexView(generic.ListView):
+def index(request):
     template_name = 'royaltysystem/index.html'
-    context_object_name = 'artist_list'
-   
-    def get_queryset(self):
-        """Return all Artists"""
-        return Artist.objects.all()
+    artist_list = Artist.objects.all()
+    context = {
+        'artist_list': artist_list
+    }
+    return render(request, template_name, context)
+    
 
-def testview(request):
-    return render(request, 'royaltysystem/test.html', {})
+def add_artist(request):
+    ##pdb.set_trace()
+    artist_navn = request.POST.get('artist', False)
+    contract_signed = request.POST.get('dateSigned', False)
+    try:
+        a = Artist(name=artist_navn, contract_since=contract_signed)
+        a.save()
+    except IntegrityError:
+        messages.error(request, "Artistnavnet finnes fra før av")
+        return HttpResponseRedirect('/royaltysystem')
+    return HttpResponseRedirect('/royaltysystem')
+    
 
 def artist(request, artist_id):
     art = get_object_or_404(Artist, pk=artist_id)    
@@ -47,7 +60,7 @@ def artist(request, artist_id):
                     avregning.nettoinntekt_akkumulert   = avregning.nettoinntekt
                     avregning.labelcut = avregning.bruttoinntekt - avregning.nettoinntekt
 
-                avregning.bruttoinntekt_akkumulert  = avregning.bruttoinntekt    
+                avregning.bruttoinntekt_akkumulert  = avregning.bruttoinntekt
                 avregning.kostnader_akkumulert      = avregning.kostnader
             else:
                 avregning.bruttoinntekt_akkumulert  = avregning.bruttoinntekt + ut.avregninger[j-1].bruttoinntekt_akkumulert
@@ -89,6 +102,9 @@ def kalkuler_akkumulert_when_utbetalt(avregninger, attribute):
         else:
             value += getattr(a, attribute, False)
     return value
+
+def feil(request):
+    return render(request, 'royaltysystem/test.html', {'name': 'Likt navn'})
 
 def nyutgivelse(request, artist_id):
     katalognr = request.POST['katalognr']

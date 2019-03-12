@@ -2,9 +2,31 @@
   <title>Bad Vibes royalty system</title>
   {% load static %}
   <link rel="stylesheet" type="text/css" href="{% static 'royaltysystem/css/style.css' %}">
+    
 </head>
 <body>
- {% include 'royaltysystem/partials/navbar.html' %}       
+ {% include 'royaltysystem/partials/navbar.html' %}    
+
+  <a href="#" id="knapp" onclick='$("#exampleModal").modal({show: true});'></a>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Feil</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="-">&times;</span>
+          </button>
+        </div>
+        <div id="feilmelding" class="modal-body">
+            En artist med det samme navnet finnes allerede
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
     <div class="container">
         {% if artist_list %}
         <div class="row">
@@ -15,18 +37,34 @@
     {% else %}
         <p>No artists are available.</p>
     {% endif %}
-    <button class="btn btn-success mb-2" id="add" data-toggle="collapse" data-target="#collapseExample" type="button" aria-expanded="false" aria-constrols="collapseExample">Legg til ny artist</button>
+    <button class="btn btn-secondary mb-2" id="add" data-toggle="collapse" data-target="#collapseExample" type="button" aria-expanded="false" aria-constrols="collapseExample">Legg til ny artist</button>
     <div class="collapse" id="collapseExample">
-        <form class="form-inline" action="{% url 'index' %}">
+        <form class="form-inline" action="{% url 'add_artist' %}" method="POST">
+            {% csrf_token %}
             <label class="sr-only" for="artistInput">Artistnavn</label>
-            <input type="text" class="form-control mb-2 mr-sm-2" id="artistInput" placeholder="Artistnavn...">
+            <input type="text" name="artist" class="form-control mb-2 mr-sm-2" id="artistInput" required placeholder="Artistnavn...">
             
             <label class="sr-only" for="dateInput">Kontrakt signert</label>
-            <input type="date" id="dateInput" class="form-control mb-2 mr-sm-2">
+            <input type="date" name="dateSigned" id="dateInput" class="form-control mb-2 mr-sm-2" required>
             
-            <button type="submit" class="btn mb-2 btn-sm btn-primary">Legg til</button>
+            <button type="submit" class="btn mb-2 btn-sm btn-success">Legg til</button>
         </form>
     </div>
 </div>
 
-{% include 'royaltysystem/partials/bottom.html' %}
+ 
+ 
+
+ <!--<script>$('#exampleModal').modal({show: true})</script>-->
+
+    {% include 'royaltysystem/partials/bottom.html' %}
+    {% if messages%}
+    {% for mes in messages %}
+    <script type="text/javascript">
+        $( document ).ready(function() {
+            $('#feilmelding').text('{{ mes }}');
+            $("#exampleModal").modal({show: true});
+        });
+    </script>
+    {% endfor %}
+    {% endif %}

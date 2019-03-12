@@ -3,7 +3,7 @@ from django.utils import timezone
 
 # Create your models here.
 class Artist(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     contract_since = models.DateField()
     def __str__(self):
         return self.name
