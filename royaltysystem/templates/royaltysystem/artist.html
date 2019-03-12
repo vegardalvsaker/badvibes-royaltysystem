@@ -5,7 +5,7 @@
 </head>
 <body>
     {% include 'royaltysystem/partials/navbar.html' %}
-    <div class="container">
+    <div id="container" class="container">
     <h1 class="text-center">{{ artist.name }}</h1>
         {% if artist.utgivelser %}
         <h4>Utgivelser:</h4>
@@ -88,42 +88,80 @@
                 {% endfor %}
             </table>
             {% else %}
-            <h3 class="text-center">Ingen utgivelser registrert for denne artisten</h3>
-            <a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Legg til</h5></a>  
+            <div class="collapse" id="ingenUtgivelserWarning">
+            <h3 class="text-center text-warning">Ingen utgivelser registrert for denne artisten</h3>
+            <a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Legg til</h5></a></div>
+            <!--<img class="text-center" src="{% static 'royaltysystem/icons/plus.svg' %}" style="height: 25px;">-->
             <div class="collapse" id="addUtgivelseCollapse">
                 <div class="card">
                     <div class="container">
-                        <form>
-                                <div class="form-group">
-                                  <label for="artist">Artist</label>
-                                  <input type="text" class="form-control" id="artist" aria-describedby="artistHelp" placeholder="{{ artist.name }}" readonly>
-                                </div>
-                                <div class="form-group">
-                                  <label for="katalognr">Katalognummer</label>
-                                  <input type="text" class="form-control" id="katalognr" placeholder="BV001 etc...">
-                                  <label for="utgivelseNavn">Navn på utgivelse</label>
-                                  <input type="text" class="form-control" id="utgivelseNavn" placeholder="Kanskje kommer kongen...">
-                                </div>
-                                <div class="form-check">
-                                  <input type="checkbox" class="form-check-input" id="digitalCheck">
-                                  <label class="form-check-label" for="digitalCheck">Digial</label>
-                                </div>
-                                <div class="form-check">
-                                  <input type="checkbox" class="form-check-input" id="fysiskCheck">
-                                  <label class="form-check-label" data-toggle="collapse" data-target="#fysiskFormCollapse" aria-expanded="false" aria-controls="fysiskFormCollapse" for="fysiskCheck">Fysisk</label>
-                                </div>
-                                <div id="fysiskFormCollapse" class="collapse" aria-expanded="false">
-                                    <div class="form-group">
-                                        <label for="format">Format</label>
-                                        <input type="text" id="format" class="form-control">
+                        <div class="row">
+                            <form class="col-10 offset-1 mt-3 mb-3 font-weight-light" action="{% url 'nyutgivelse' artist.id %}" method="POST">
+                                <h5>Ny utgivelse:</h5>
+                                    {% csrf_token %}
+                                    <div class="form-group ">
+                                    <label for="artist">Artist</label>
+                                    <input type="text" class="form-control text-center" id="artist" aria-describedby="artistHelp" placeholder="{{ artist.name }}" readonly>
                                     </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-3">
+                                            <label for="katalognr">Katalognummer</label>
+                                            <input type="text" class="form-control text-center" id="katalognr" name="katalognr" placeholder="BV001...">
+                                        </div>
+                                            <div class="form-group col-8 offset-1"> 
+                                                <label for="utgivelseNavn">Navn på utgivelse</label>
+                                                <input type="text" class="form-control text-center" id="utgivelseNavn" name="utgivelse" placeholder="...">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-3" >
+                                            <label for="dato">Dato utgitt</label>
+                                            <input type="date" class="form-control text-center" id="dato" name="dato">
+                                            </div>
+                                        
+                                        
+                                            <div class="form-group col-2 offset-1">
+                                            <label for="prosent">Royaltyprosent</label>
+                                            <div class="input-group">
+                                                
+                                            <input type="number" class="form-control text-center" max="100" min="0" id="prosent" name="prosent" value="50.00">
+                                            <div class="input-group-append">
+                                                <div class="input-group-text">%</div>
+                                            </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" name="digital" id="digitalCheck">
+                                                <label class="form-check-label" for="digitalCheck">Digital</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group offset-1">
+                                            <div class="form-check" data-toggle="collapse" data-target="#fysiskFormCollapse" aria-expanded="false" aria-controls="fysiskFormCollapse">
+                                                <input type="checkbox" class="form-check-input" name="fysisk" id="fysiskCheck">
+                                                <label class="form-check-label" for="fysiskCheck">Fysisk</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="fysiskFormCollapse" class="collapse" aria-expanded="false">
+                                        <div class="form-group">
+                                            <label for="format">Format</label>
+                                            <input type="text" id="format" name="fysiskFormat" class="form-control text-center">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn float-right btn-sm btn-success">Send</button>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                              </form>
-
+                            </form>
                     </div>
                 </div>
             </div>
             {% endif %} 
         </div>
 {% include 'royaltysystem/partials/bottom.html' %}
+<script>
+    $( document ).ready(function() {
+          
+        setTimeout(() => { $('#ingenUtgivelserWarning').collapse('show') }, 600);
+    });</script>

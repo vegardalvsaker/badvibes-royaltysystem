@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.db import IntegrityError
 from django.contrib import messages
 
@@ -107,10 +107,13 @@ def feil(request):
     return render(request, 'royaltysystem/test.html', {'name': 'Likt navn'})
 
 def nyutgivelse(request, artist_id):
+    """
     katalognr = request.POST['katalognr']
     navn = request.POST['navn']
     dato = request.POST['utgittdato']
     return HttpResponse("Katalognr %s, Navn %s, dato utgitt %s" % (katalognr, navn, dato))
+    """
+    return HttpResponseRedirect(reverse(artist, args=[artist_id]))
 
 def utgivelse(request, artist_id, katalognr):
     periode = request.GET.get('periode', False)
