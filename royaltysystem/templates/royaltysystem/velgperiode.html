@@ -1,0 +1,16 @@
+{% include 'royaltysystem/partials/header.html' %}
+<title> {{ utgivelse }}</title>
+</head>
+<body>
+    {% include 'royaltysystem/partials/navbar.html' %}
+        <div class="container">
+            {% if ut.perioder %}
+                {% for periode in utgivelse.perioder %}
+                <a class="" href="{% url 'utgivelse' artist_id katalognr %}?periode={{ periode }}">{{ periode }}</a>
+                {% endfor %}
+            {% else %}
+                
+            {% endif %}
+            </div>
+
+{% include 'royaltysystem/partials/bottom.html' %}

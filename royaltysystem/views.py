@@ -7,7 +7,7 @@ from django.contrib import messages
 
 import pdb;
 
-from .models import Artist, Utgivelse, Periode
+from .models import Artist, Utgivelse, UtgivelseFormat, Periode
 
 PERIODS = Periode.objects.all()
 
@@ -34,7 +34,7 @@ def add_artist(request):
     
 
 def artist(request, artist_id):
-    art = get_object_or_404(Artist, pk=artist_id)    
+    art = get_object_or_404(Artist, pk=artist_id)
     art.utgivelser = []
     for i, ut in enumerate(art.utgivelse_set.all()):
         ut.avregninger = []
@@ -42,11 +42,13 @@ def artist(request, artist_id):
         ut.perioder = []
         if len(ut.utgivelseformat_set.all()) > 0: 
             avregning_detaljert_list = ut.utgivelseformat_set.all()[0].avregning_detaljert_set.all()
-            start, stop = get_active_periode_indices(avregning_detaljert_list)
+            if avregning_detaljert_list:
+                start, stop = get_active_periode_indices(avregning_detaljert_list)
 
-            for _, l in enumerate(range(start, stop)):
-                ut.perioder.append(PERIODS[l].periode)
+                for _, l in enumerate(range(start, stop)):
+                    ut.perioder.append(PERIODS[l].periode)
 
+        
         for j, avregning in enumerate(ut.avregning_set.all()):
             nettoinntekt = round(avregning.bruttoinntekt - avregning.kostnader, 2)
 
@@ -84,6 +86,8 @@ def artist(request, artist_id):
             ut.totalt['nettoinntekt']               = sum(filter(None,(a.nettoinntekt for a in ut.avregninger)))
             ut.totalt['nettoinntekt_akkumulert']    = kalkuler_akkumulert_when_utbetalt(ut.avregninger, 'nettoinntekt_akkumulert')
             ut.totalt['labelcut']                   = sum(filter(None, (a.labelcut for a in ut.avregninger)))
+            if j == 0:
+                messages.warning(request, 'Ingen data registrert på denne utgivelsen')
         art.utgivelser.append(ut)
 
     context = {
@@ -107,16 +111,48 @@ def feil(request):
     return render(request, 'royaltysystem/test.html', {'name': 'Likt navn'})
 
 def nyutgivelse(request, artist_id):
-    """
-    katalognr = request.POST['katalognr']
-    navn = request.POST['navn']
-    dato = request.POST['utgittdato']
-    return HttpResponse("Katalognr %s, Navn %s, dato utgitt %s" % (katalognr, navn, dato))
-    """
+    if request.method == "POST":
+        katalognr = request.POST['katalognr']
+        navn = request.POST.get('utgivelse', False)
+        dato = request.POST.get('dato', False)
+        prosent = request.POST.get('prosent', False)
+        digital = request.POST.get('digital', False)
+        fysisk_format = request.POST.get('fysiskFormat', False)
+        try:
+            ut = Utgivelse(katalognr=katalognr, navn=navn, utgittdato=dato, artist=Artist.objects.get(pk=artist_id), royalty_prosent=prosent)
+            ut.save()
+            if digital:
+                ut_dig = UtgivelseFormat(format="Digital", utgivelse=ut)
+                ut_dig.save()
+            if fysisk_format:
+                ut_fys = UtgivelseFormat(format="Fysisk", fysisk_format_type=fysisk_format, utgivelse=ut)
+                ut_fys.save()
+        except IntegrityError:
+            messages.error(request, IntegrityError.__cause__)
     return HttpResponseRedirect(reverse(artist, args=[artist_id]))
 
 def utgivelse(request, artist_id, katalognr):
     periode = request.GET.get('periode', False)
+    if not periode:
+        ut = Utgivelse.object.get(pk=katalognr)
+        ut.perioder = []
+        if ut.utgivelseformat_set.all():
+
+            avregning_detaljert_list = ut.utgivelseformat_set.all()[0].avregning_detaljert_set.all()
+            if avregning_detaljert_list:
+                start, stop = get_active_periode_indices(avregning_detaljert_list)
+
+                for _, l in enumerate(range(start, stop)):
+                    ut.perioder.append(PERIODS[l].periode)
+                
+            else:
+               ut.ingen_perioder = True
+            context = {
+                'utgivelse': ut,
+                'artist_id': artist_id,
+                'katalognr': katalognr
+                }
+            return render(request, "royaltysystem/velgperiode.html", context)
     periode.replace("%20", " ")
     utgivelsen = get_object_or_404(Utgivelse, pk=katalognr)
     fysisk_format = utgivelsen.utgivelseformat_set.filter(format__startswith='Fysisk')[0]
@@ -211,9 +247,6 @@ def kalkuler_total_akkumulert(periode, utgivelse):
     
     first_periode, last_periode = get_active_periode_indices(digital_avregning_detaljert_list)
 
-
-
-    ##pdb.set_trace()
     ##Sjekker at perioden er innenfor utgivelsens første og siste periode.
     if current_periode_index >= first_periode and current_periode_index <= last_periode:
         for i in range(first_periode, current_periode_index):
@@ -271,7 +304,10 @@ def get_active_periode_indices(avregning_detaljert_list):
                 active_period_indices.append(j)
     myset = set(active_period_indices)
     first_periode = myset.pop()
-    last_periode = max(myset)
+    if len(avregning_detaljert_list) == 1:
+        last_periode = first_periode
+    else:
+        last_periode = max(myset)
     return first_periode, last_periode
 
 def get_current_periode(periode):
