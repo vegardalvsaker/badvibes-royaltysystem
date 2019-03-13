@@ -3,7 +3,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'royaltysystem/css/style.css' %}">
 <title>{{ artist.name }}</title>
 </head>
-<body>
+<body style="min-height: 100vh !important;">
     {% include 'royaltysystem/partials/navbar.html' %}
     <div id="container" class="container">
     <h1 class="text-center">{{ artist.name }}</h1>
@@ -89,8 +89,9 @@
             </table>
             {% else %}
             <div class="collapse" id="ingenUtgivelserWarning">
-            <h3 class="text-center text-warning">Ingen utgivelser registrert for denne artisten</h3>
-            <a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Legg til</h5></a></div>
+            <h3 class="text-center text-warning">Ingen utgivelser registrert for denne artisten</h3></div>
+            {% endif %} 
+            <div class="collapse" id="ingenUtgivelserWarning"><a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Legg til</h5></a></div>
             <!--<img class="text-center" src="{% static 'royaltysystem/icons/plus.svg' %}" style="height: 25px;">-->
             <div class="collapse" id="addUtgivelseCollapse">
                 <div class="card">
@@ -157,7 +158,6 @@
                     </div>
                 </div>
             </div>
-            {% endif %} 
         </div>
 {% include 'royaltysystem/partials/bottom.html' %}
 <script>
