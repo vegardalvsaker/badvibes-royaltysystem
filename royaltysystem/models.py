@@ -39,7 +39,6 @@ class UtgivelseFormat(models.Model):
 
 
 class Avregning_Detaljert(models.Model):
-    periode         = models.CharField(max_length=7)
     periode_new     = models.ForeignKey(Periode, on_delete=models.CASCADE, null=True)
     kilde           = models.CharField(max_length=20)
     antall          = models.IntegerField(null=True, blank=True)

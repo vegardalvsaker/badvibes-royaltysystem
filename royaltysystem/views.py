@@ -1,14 +1,14 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.urls import reverse, reverse_lazy
 from django.db import IntegrityError
 from django.contrib import messages
-from .utils.utils import kalkuler_akkumulert_when_utbetalt, kalkuler_fysisk_sum, kalkuler_total_akkumulert, Total_Row, get_active_periode_indices, kalkuler_digital_sum
+from .utils.utils import kalkuler_akkumulert_when_utbetalt, kalkuler_fysisk_sum, kalkuler_total_akkumulert, kalkuler_total_akkumulert_digital, kalkuler_total_akkumulert_fysisk, Total_Row,Total_Digital_Row, Total_Fysisk_Row, get_active_periode_indices, kalkuler_digital_sum, get_prev_and_next_periode
 
-import pdb;
+import pdb
 
-from .models import Artist, Utgivelse, UtgivelseFormat, Periode
+from .models import Artist, Utgivelse, UtgivelseFormat, Periode, Avregning_Detaljert
 
 PERIODS = Periode.objects.all()
 
@@ -20,6 +20,8 @@ def index(request):
     }
     return render(request, template_name, context)
 
+def json(request):
+    return JsonResponse({'foo': 'bar'})
 
 def add_artist(request):
     ##pdb.set_trace()
@@ -95,11 +97,23 @@ def artist(request, artist_id):
     return render(request, 'royaltysystem/artist.html', context)
 
 
-def nyavregning_detaljert_digital(request, utgivelse):
-    
+def nyavregning_detaljert_digital(request, artist_id, katalognr):
+    p = request.POST.get('periode')
+    periode = Periode.objects.get_or_create(periode=p)[0]
+    rader = int(request.POST.get('rader'))
+    utgivelse_format = UtgivelseFormat.objects.get(utgivelse=katalognr, format='Digital')
+    request
+    for i in range (1, rader+1):
+        kilde = request.POST.get('kilde' + str(i))
+        dl_utgivelse = request.POST.get('DLutgivelse' + str(i), False)
+        dl_spor = request.POST.get('DLspor' + str(i), False)
+        streams = request.POST.get('streams' + str(i))
 
-def feil(request):
-    return render(request, 'royaltysystem/test.html', {'name': 'Likt navn'})
+        avreg_detalj = Avregning_Detaljert(periode_new=periode, kilde=kilde, dl_utgivelse=dl_utgivelse, dl_spor=dl_spor, streams=streams, utgivelseFormat=utgivelse_format)
+        avreg_detalj.save()
+    #artist_id = Utgivelse.objcets.get(katalognr=katalognr).artist.id
+    return HttpResponseRedirect(reverse(utgivelse, args=[artist_id, katalognr]))
+
 
 
 def nyutgivelse(request, artist_id):
@@ -136,7 +150,8 @@ def utgivelse(request, artist_id, katalognr):
             if avregning_detaljert_list:
                 start, stop = get_active_periode_indices(avregning_detaljert_list)
 
-                for _, l in enumerate(range(start, stop)):
+                for _, l in enumerate(range(start, stop + 1)):
+                    ut.ingen_perioder = False
                     ut.perioder.append(PERIODS[l].periode)
                 
             else:
@@ -146,60 +161,108 @@ def utgivelse(request, artist_id, katalognr):
                 'artist_id': artist_id,
                 'katalognr': katalognr
                 }
+
             return render(request, "royaltysystem/velgperiode.html", context)
     periode.replace("%20", " ")
     utgivelsen = get_object_or_404(Utgivelse, pk=katalognr)
-    fysisk_format = utgivelsen.utgivelseformat_set.filter(format__startswith='Fysisk')[0]
-    fysisk  = fysisk_format.avregning_detaljert_set.filter(periode__startswith=periode)
-    digital = utgivelsen.utgivelseformat_set.filter(format__startswith='Digital')[0].avregning_detaljert_set.filter(periode__startswith=periode)
 
-    fysisk_sum = kalkuler_fysisk_sum(fysisk_format, periode)
-    digital_sum = kalkuler_digital_sum(digital)
+    forrige_periode, neste_periode = get_prev_and_next_periode(periode)
 
-    total_akkumulert = kalkuler_total_akkumulert(periode, utgivelsen)
-
-    total_denne = Total_Row('Denne', fysisk_sum['antall'],
-                            digital_sum['dl_utgivelse'], digital_sum['dl_spor'],
-                            digital_sum['streams'],
-                            fysisk_sum['brutto'] + digital_sum['brutto'])
-
-    total_totalt = Total_Row('Totalt',
-                             total_akkumulert.fysisksalg + total_denne.fysisksalg,
-                             total_akkumulert.DL_utgivelse + total_denne.DL_utgivelse,
-                             total_akkumulert.DL_spor + total_denne.DL_spor,
-                             total_akkumulert.streams + total_denne.streams,
-                             total_akkumulert.brutto + total_denne.brutto)
-    total = [total_akkumulert, total_denne, total_totalt]
-
-    current_periode_index = None
-    for i, p in enumerate(PERIODS):
-        if p.periode == periode:
-            current_periode_index = i
-
-    if current_periode_index is 0:
-        forrige_periode = PERIODS[0].periode
-        neste_periode = PERIODS[1].periode
-    elif current_periode_index is (len(PERIODS)-1):
-        forrige_periode = PERIODS[current_periode_index-1].periode
-        neste_periode = PERIODS[current_periode_index].periode
-    else:
-        forrige_periode = PERIODS[current_periode_index-1].periode
-        neste_periode = PERIODS[current_periode_index+1].periode
-    
     context = {
         'artist_id': artist_id,
         'periode': periode,
         'forrige_periode': forrige_periode,
         'neste_periode': neste_periode,
         'utgivelse': utgivelsen,
-        'fysisk': {
-            'data': fysisk,
-            'sum': fysisk_sum
-            },
-        'digital': {
-            'data': digital,
-            'sum': digital_sum
-            },
-        'total': total
     }
-    return render(request, 'royaltysystem/utgivelse.html/', context)
+
+    formats = utgivelsen.utgivelseformat_set.all()
+    if len(formats) is 1:
+        if formats[0].format == 'Fysisk':
+            fysisk = formats[0].avregning_detaljert_set.filter(periode_new=get_periode(periode))
+            fysisk_sum = kalkuler_fysisk_sum(fysisk)
+            total = get_total_fysisk(formats[0], periode)
+
+            context['fysisk'] = {'data': fysisk, 'sum': fysisk_sum}
+            context['total'] = total
+            return render(request, "royaltysystem/utgivelse_fysisk.html", context)
+        elif formats[0].format == 'Digital':
+            digital = formats[0].avregning_detaljert_set.filter(periode_new=get_periode(periode))
+            digital_sum = kalkuler_digital_sum(digital)
+            total = get_total_digital(formats[0], periode)
+
+            context['digital'] = {'data': digital, 'sum': digital_sum}
+            context['total'] = total
+            return render(request, "royaltysystem/utgivelse_digital.html", context)
+        else:
+            return render(request, "royaltysystem/feil.html", {})
+    elif len(formats) is 2:
+
+        fysisk_format = utgivelsen.utgivelseformat_set.filter(format__startswith='Fysisk')[0]
+        fysisk  = fysisk_format.avregning_detaljert_set.filter(periode_new=get_periode(periode))
+        digital = utgivelsen.utgivelseformat_set.filter(format__startswith='Digital')[0].avregning_detaljert_set.filter(periode_new=get_periode(periode))
+
+        fysisk_sum = kalkuler_fysisk_sum(fysisk)
+        digital_sum = kalkuler_digital_sum(digital)
+
+        total_akkumulert = kalkuler_total_akkumulert(periode, utgivelsen)
+
+        total_denne = Total_Row('Denne', fysisk_sum['antall'],
+                                digital_sum['dl_utgivelse'], digital_sum['dl_spor'],
+                                digital_sum['streams'],
+                                fysisk_sum['brutto'] + digital_sum['brutto'])
+
+        total_totalt = Total_Row('Totalt',
+                                total_akkumulert.fysisksalg + total_denne.fysisksalg,
+                                total_akkumulert.DL_utgivelse + total_denne.DL_utgivelse,
+                                total_akkumulert.DL_spor + total_denne.DL_spor,
+                                total_akkumulert.streams + total_denne.streams,
+                                total_akkumulert.brutto + total_denne.brutto)
+        total = [total_akkumulert, total_denne, total_totalt]
+
+        context['fysisk'] = {'data': fysisk, 'sum': fysisk_sum}
+
+        context['digital'] = {'data': digital, 'sum': digital_sum}
+
+        context['total'] = total
+        return render(request, 'royaltysystem/utgivelse.html/', context)
+    return render(request, "royaltysystem/utgivelse_feil.html", {})
+
+
+def get_total_fysisk(fysisk_format, periode):
+    fysisk_whole_list = fysisk_format.avregning_detaljert_set.all()
+    fysisk_thisperiod_list = fysisk_format.avregning_detaljert_set.filter(periode_new=periode)
+
+    fysisk_sum = kalkuler_fysisk_sum(fysisk_thisperiod_list)
+
+    total_akkumulert = kalkuler_total_akkumulert_fysisk(fysisk_whole_list, periode)
+
+    total_denne = Total_Fysisk_Row('Denne', fysisk_sum['antall'], fysisk_sum['brutto'])
+
+    total_totalt = Total_Fysisk_Row('Totalt', total_akkumulert.fysisksalg + total_denne.fysisksalg, total_akkumulert.brutto + total_denne.brutto)
+
+    total = [total_akkumulert, total_denne, total_totalt]
+    return total
+    
+def get_total_digital(digital_format, periode):
+    digital_whole_list = digital_format.avregning_detaljert_set.all()
+    digital_thisperiod_list = digital_format.avregning_detaljert_set.filter(periode_new=periode)
+
+    digital_sum = kalkuler_digital_sum(digital_thisperiod_list)
+
+    total_akkumulert = kalkuler_total_akkumulert_digital(digital_whole_list, periode)
+    
+    total_denne = Total_Digital_Row('Denne', digital_sum['dl_utgivelse'],
+                                    digital_sum['dl_spor'], digital_sum['streams'],
+                                        digital_sum['brutto'])
+
+    total_totalt = Total_Digital_Row('Totalt',
+                            total_akkumulert.DL_utgivelse + total_denne.DL_utgivelse,
+                            total_akkumulert.DL_spor + total_denne.DL_spor,
+                            total_akkumulert.streams + total_denne.streams,
+                            total_akkumulert.brutto + total_denne.brutto)
+    total = [total_akkumulert, total_denne, total_totalt]
+    return total
+
+def get_periode(periode):
+    return Periode.objects.get(periode=periode)
