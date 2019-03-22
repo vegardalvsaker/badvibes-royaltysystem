@@ -1,0 +1,91 @@
+{% include 'royaltysystem/partials/header.html' %}
+  <title>{{ utgivelse }} {{ periode}}</title>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'royaltysystem/css/style.css' %}">
+</head>
+<body>
+{% include 'royaltysystem/partials/navbar.html' %}
+
+<div class="container">
+    <h1>{{ utgivelse }} i periode: {{ periode }}</h1>
+    <a class="btn btn-secondary" href="{% url 'utgivelse' artist_id utgivelse.katalognr %}?periode={{ forrige_periode }}">Forrige periode</a>
+    <a class="btn btn-secondary float-right"href="{% url 'utgivelse' artist_id utgivelse.katalognr %}?periode={{ neste_periode }}">Neste periode</a>
+
+    <a class="text-center" data-toggle="collapse" href="#formRad" role="button" aria-expanded="false" aria-controls="formRad"><h5>Ny rad</h5></a>
+
+    <table class="table table-sm table-bordered text-center" id="fysiskTabell">
+        <thead>
+            <tr class="bg-dark text-light">
+                <th colspan="6" scope="col" class="text-center">Detaljert royaltyavregning for:<br>{{ utgivelse }} <br> {{ periode }}</th>
+            </tr>
+            <tr class="bg-dark text-light text-center">
+                <th colspan="6" scope="col">{{ format }}</th>
+            </tr>
+            <tr class="table-secondary">
+                <th colspan="2" class="table-secondary" scope="col">Kilde</th>
+                <th class="table-secondary" scope="col">Antall</th>
+                <th scope="col">Inntekter</th>
+                <th scope="col">Kostnader</th>
+                <th scope="col">Brutto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in fysisk.data %}
+            <tr>
+                <td colspan="2">{{ rec.kilde }}</td>
+                <td>{{ rec.antall }}</td>
+                <td>{{ rec.inntekter }} kr</td>
+                <td>{{ rec.kostnader }} kr</td>
+                <td>{{ rec.brutto }} kr</td>
+            </tr>
+            {% endfor %}
+            <tr class="collapse" id="formRad">
+                <form action="{% url 'add_avregning_detaljert_fysisk' artist_id utgivelse.katalognr %}" method="POST">
+                {% csrf_token %}
+                    <td colspan="2"><input class="form-control" type="text" name="kilde1"></td>
+                    <td><input class="form-control" type="number" min="0" name="antall1"></td>
+                    <td><input class="form-control" type="number" min="0" name="inntekter1"></td>
+                    <td><input class="form-control" type="number" min="0" name="kostnader1" required></td>
+                    <td><input class="form-control" type="number" min="0" name="brutto1" required></td>
+            </tr>
+            <tr class="font-weight-bold">
+                <td colspan="2">Sum</td>
+                <td>{{ fysisk.sum.antall }}</td>
+                <td>{{ fysisk.sum.inntekter }} kr</td>
+                <td>{{ fysisk.sum.kostnader }} kr</td>
+                <td>{{ fysisk.sum.brutto }} kr</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr class="bg-dark text-light text-center">
+                <th colspan="6">Total</th>
+            </tr>
+            <tr class="table-secondary">
+                <th colspan="2" scope="col">Avregning</th>
+                <th colspan="2" scope="col">Fysisk salg</th>
+                <th colspan="2" scope="col">Brutto</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in total %}
+        {% if t.avregning == 'Totalt' %}
+            <tr class="font-weight-bold">
+        {% else %}    
+            <tr>
+        {% endif %}      
+                <td colspan="2">{{ t.avregning }}</td>
+                <td colspan="2">{{ t.fysisksalg }}</td>
+                <td colspan="2">{{ t.brutto }} kr</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="collapse" id="formRad">
+            <input type="hidden" name="rader" value="1">
+            <input type="hidden" name="periode" value="{{ periode }}">
+            <input type="submit" class="btn btn-success float-right mb-2" value="Legg til data">
+        
+                </form>
+    </div>
+</div>
+{% include 'royaltysystem/partials/bottom.html' %}

@@ -96,22 +96,47 @@ def artist(request, artist_id):
 
     return render(request, 'royaltysystem/artist.html', context)
 
+def avregning_detaljert(request, artist_id, katalognr):
+    context = {
+        'artist_id': artist_id,
+        'katalognr': katalognr
+    }
+    return render(request, 'royaltysystem/avregning_detaljert_form.html', context)
 
-def nyavregning_detaljert_digital(request, artist_id, katalognr):
+def add_avregning_detaljert_digital(request, artist_id, katalognr):
     p = request.POST.get('periode')
     periode = Periode.objects.get_or_create(periode=p)[0]
     rader = int(request.POST.get('rader'))
     utgivelse_format = UtgivelseFormat.objects.get(utgivelse=katalognr, format='Digital')
-    request
+    
     for i in range (1, rader+1):
         kilde = request.POST.get('kilde' + str(i))
         dl_utgivelse = request.POST.get('DLutgivelse' + str(i), False)
         dl_spor = request.POST.get('DLspor' + str(i), False)
-        streams = request.POST.get('streams' + str(i))
+        streams = request.POST.get('streams' + str(i), False)
+        brutto = request.POST.get('brutto' + str(i), False)
 
-        avreg_detalj = Avregning_Detaljert(periode_new=periode, kilde=kilde, dl_utgivelse=dl_utgivelse, dl_spor=dl_spor, streams=streams, utgivelseFormat=utgivelse_format)
+        avreg_detalj = Avregning_Detaljert(periode_new=periode, kilde=kilde, dl_utgivelse=dl_utgivelse, dl_spor=dl_spor, streams=streams, brutto=brutto, utgivelseFormat=utgivelse_format)
         avreg_detalj.save()
-    #artist_id = Utgivelse.objcets.get(katalognr=katalognr).artist.id
+    
+    return HttpResponseRedirect(reverse(utgivelse, args=[artist_id, katalognr]))
+
+def add_avregning_detaljert_fysisk(request, artist_id, katalognr):
+    p = request.POST.get('periode')
+    periode = Periode.objects.get_or_create(periode=p)[0]
+    rader = int(request.POST.get('rader'))
+    utgivelse_format = UtgivelseFormat.objects.get(utgivelse=katalognr, format='Fysisk')
+    
+    for i in range (1, rader+1):
+        kilde = request.POST.get('kilde' + str(i))
+        antall = request.POST.get('antall' + str(i), False)
+        inntekter = request.POST.get('inntekter' + str(i), False)
+        kostnader = request.POST.get('kostnader' + str(i), False)
+        brutto = request.POST.get('brutto' + str(i), False)
+
+        avreg_detalj = Avregning_Detaljert(periode_new=periode, kilde=kilde, antall=antall, inntekter=inntekter, kostnader=kostnader, brutto=brutto, utgivelseFormat=utgivelse_format)
+        avreg_detalj.save()
+    
     return HttpResponseRedirect(reverse(utgivelse, args=[artist_id, katalognr]))
 
 
@@ -147,13 +172,13 @@ def utgivelse(request, artist_id, katalognr):
         if ut.utgivelseformat_set.all():
 
             avregning_detaljert_list = ut.utgivelseformat_set.all()[0].avregning_detaljert_set.all()
-            if avregning_detaljert_list:
+            if len(avregning_detaljert_list) > 0:
                 start, stop = get_active_periode_indices(avregning_detaljert_list)
 
                 for _, l in enumerate(range(start, stop + 1)):
                     ut.ingen_perioder = False
                     ut.perioder.append(PERIODS[l].periode)
-                
+                ut.ingen_perioder = False
             else:
                ut.ingen_perioder = True
             context = {
@@ -177,12 +202,17 @@ def utgivelse(request, artist_id, katalognr):
     }
 
     formats = utgivelsen.utgivelseformat_set.all()
+    
     if len(formats) is 1:
+        if len(formats[0].avregning_detaljert_set.filter(periode_new=periode)) == 0:
+            messages.warning(request, 'Ingen data registrert for ' + utgivelsen.__str__() + ' i perioden ' + periode)
+            return HttpResponseRedirect(reverse(artist, args=[artist_id]))
         if formats[0].format == 'Fysisk':
             fysisk = formats[0].avregning_detaljert_set.filter(periode_new=get_periode(periode))
             fysisk_sum = kalkuler_fysisk_sum(fysisk)
             total = get_total_fysisk(formats[0], periode)
 
+            context['format'] = formats[0].fysisk_format_type
             context['fysisk'] = {'data': fysisk, 'sum': fysisk_sum}
             context['total'] = total
             return render(request, "royaltysystem/utgivelse_fysisk.html", context)
@@ -266,3 +296,10 @@ def get_total_digital(digital_format, periode):
 
 def get_periode(periode):
     return Periode.objects.get(periode=periode)
+
+def contains_periode(avregning_detaljert_list, periode):
+    contains = False
+    for i, a in enumerate(avregning_detaljert_list):
+        if a.periode_new.__str__() == periode:
+            contains = True
+    return contains

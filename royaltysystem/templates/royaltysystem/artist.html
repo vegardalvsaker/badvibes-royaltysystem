@@ -17,7 +17,7 @@
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                     {% for periode in utgivelse.perioder %}  
-                    <a class="dropdown-item" href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode={{ periode }}">{{ periode }}</a>
+                    <a class="dropdown-item" style="text-decoration: none; color: white" href="{% url 'utgivelse' artist.id utgivelse.katalognr %}?periode={{ periode }}">{{ periode }}</a>
                     {% endfor %}
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                 
                     {% for utgivelse in artist.utgivelser %}
                     <tr class="bg-dark text-light text-center">
-                        <th colspan="9" class="text-center"> {{ utgivelse }}</th>
+                        <th colspan="9" class="text-center"> <a href="{% url 'utgivelse' artist.id utgivelse.katalognr %}" >{{ utgivelse }}</a></th>
                     </tr>
                     <tr class="table-secondary ">
                         <th class="headerDivider" scope="col">Periode</th>

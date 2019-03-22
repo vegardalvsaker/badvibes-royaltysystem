@@ -5,56 +5,14 @@
 <body>
     {% include 'royaltysystem/partials/navbar.html' %}
         <div class="container">
-            {% if not ut.ingen_perioder %}
+            {% if utgivelse.ingen_perioder is False %}
                 {% for periode in utgivelse.perioder %}
                 <a class="" href="{% url 'utgivelse' artist_id katalognr %}?periode={{ periode }}">{{ periode }}</a>
                 {% endfor %}
             {% else %}
-                <h1>Legg til avregningsdata</h1>
-                <div class="card">
-                    <div class="container">
-                        <div class="row">
-                            <form action="{% url 'ny_detaljert_avregning' artist_id katalognr %}" method="POST">
-                            {% csrf_token %}
-                                <div class="form-row">
-                                    <div class="form-group col-3">
-                                        <label for="periode">Periode</label>
-                                        <input name="periode" class="form-control" id="periode" type="text" minlength="7" maxlength="7">
-                                    </div>
-
-                                    <div class="form-group col-3">
-                                            <label for="rader">Rader</label>
-                                            <input name="rader" class="form-control" id="rader" type="number" readonly>
-                                        </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-3">
-                                        <label for="kilde">Kilde</label>
-                                        <input type="text" class="form-control" id="kilde" name="kilde1" required>
-                                    </div>
-
-                                    <div class="form-group col-3">
-                                        <label for="DLutgivelse">DL utgivelse</label>
-                                        <input type="number" class="form-control" id="DLutgivelse" name="DLutgivelse1" min="0" required>
-                                    </div>
-
-                                    <div class="form-group col-3">
-                                        <label for="DLspor">DL spor</label>
-                                        <input type="number" class="form-control" id="DLspor" name="DLspor1" min="0" required>
-                                    </div>
-
-                                        <div class="form-group col-3">
-                                            <label for="streams">Streams</label>
-                                            <input type="number" class="form-control" id="streams" name="streams1" min="0" required>
-                                        </div>
-                                </div>
-                                <span id="nyDigitalRad">&nbsp;</span>
-                                <input class="btn btn-sm btn-success" type="submit" value="Send">
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-success" onclick="nyDigitalRad()">Ny rad</button>
+                <a href="{% url 'avregning_detaljert' artist_id katalognr %}">Legg til detaljert avregningsdata</a>
+                
+                
             {% endif %}
             </div>
 

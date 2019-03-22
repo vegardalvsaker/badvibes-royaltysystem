@@ -79,7 +79,7 @@ def kalkuler_total_akkumulert_digital(digital_list, periode):
     dl_utgivelse = 0
     current_periode_index = get_current_periode(periode)
     first_periode, last_periode = get_active_periode_indices(digital_list)
-
+    
     for j, a in enumerate(digital_list):
         ##Uheldig sjekk. Forutsetter at dataen kommer sotert etter periode rekkefølge
         if a.periode_new.periode == PERIODS[current_periode_index].periode:
@@ -93,8 +93,8 @@ def kalkuler_total_akkumulert_digital(digital_list, periode):
                 dl_utgivelse += a.dl_utgivelse
             if a.streams is not None:
                 streams += a.streams
-        akkumulert_digital = Total_Digital_Row('Akkumulert', dl_utgivelse, dl_spor, streams, brutto)
-        return akkumulert_digital
+    akkumulert_digital = Total_Digital_Row('Akkumulert', dl_utgivelse, dl_spor, streams, brutto)
+    return akkumulert_digital
 
     return None
 
@@ -105,7 +105,7 @@ def kalkuler_total_akkumulert_fysisk(fysisk_list, periode):
     first_periode, last_periode = get_active_periode_indices(fysisk_list)
     fysisk_list_thisperiod = []
     for av, i in enumerate(fysisk_list):
-        if av.periode_new.periode == periode:
+        if i.periode_new.periode == periode:
             fysisk_list_thisperiod.append(av)                 
 
     if current_periode_index >= first_periode and current_periode_index <= last_periode:
@@ -182,8 +182,6 @@ def get_prev_and_next_periode(periode):
         forrige_periode = PERIODS[current_periode_index-1].periode
         neste_periode = PERIODS[current_periode_index+1].periode
     return forrige_periode, neste_periode
-
-
 
 class Total_Row(object):
     avregning = ""

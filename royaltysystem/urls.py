@@ -11,5 +11,7 @@ urlpatterns = [
     path('artist/<int:artist_id>/nyutgivelse/', views.nyutgivelse, name='nyutgivelse'),
     #path('artist/<int:artist_id>/utgivelse/<int:utgivelse_id>', views.utgivelse, name="utgivelse"),
     path('artist/<int:artist_id>/utgivelse/<katalognr>', views.utgivelse, name='utgivelse'),
-    path('artist/<int:artist_id>/utgivelse/<katalognr>/nydetaljertavregning', views.nyavregning_detaljert_digital, name='ny_detaljert_avregning')
+    path('artist/<int:artist_id>/utgivelse/<katalognr>/nydetaljertavregning', views.avregning_detaljert, name='avregning_detaljert'),
+    path('artist/<int:artist_id>/utgivelse/<katalognr>/nydetaljertavregning/digital', views.add_avregning_detaljert_digital, name='add_avregning_detaljert_digital'),
+    path('artist/<int:artist_id>/utgivelse/<katalognr>/nydetaljertavregning/fysisk', views.add_avregning_detaljert_fysisk, name='add_avregning_detaljert_fysisk')
 ]

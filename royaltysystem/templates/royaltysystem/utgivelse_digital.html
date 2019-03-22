@@ -1,0 +1,93 @@
+{% include 'royaltysystem/partials/header.html' %}
+  <title>{{ utgivelse }} {{ periode}}</title>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'royaltysystem/css/style.css' %}">
+</head>
+<body>
+{% include 'royaltysystem/partials/navbar.html' %}
+
+<div class="container">
+    <h1>{{ utgivelse }} i periode: {{ periode }}</h1>
+    <a class="btn btn-secondary" href="{% url 'utgivelse' artist_id utgivelse.katalognr %}?periode={{ forrige_periode }}">Forrige periode</a>
+    <a class="btn btn-secondary float-right"href="{% url 'utgivelse' artist_id utgivelse.katalognr %}?periode={{ neste_periode }}">Neste periode</a>
+    <a class="text-center" data-toggle="collapse" href="#formRad" role="button" aria-expanded="false" aria-controls="formRad"><h5>Ny rad</h5></a>
+    <table class="table table-sm table-bordered text-center" id="fysiskTabell">
+        <thead>
+            <tr class="bg-dark text-light">
+                <th colspan="6" scope="col" class="text-center">Detaljert royaltyavregning for:<br>{{ utgivelse }} <br> {{ periode }}</th>
+            </tr>
+            <tr class="bg-dark text-light">
+                <th colspan="6" class="text-center">Oversikt digital</th>
+            </tr>
+            <tr class="table-secondary">
+                <th colspan="2" scope="col">Kilde</th>
+                <th scope="col">DL utgivelse</th>
+                <th scope="col">DL spor</th>
+                <th scope="col">Streams</th>
+                <th scope="col">Brutto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for avrd in digital.data %}
+            <tr>
+                <td colspan="2">{{ avrd.kilde}}</td>
+                <td>{{ avrd.dl_utgivelse}}</td>
+                <td>{{ avrd.dl_spor}}</td>
+                <td>{{ avrd.streams}}</td>
+                <td>{{ avrd.brutto}} kr</td>
+            </tr>
+            {% endfor %}
+            <tr class="collapse" id="formRad">
+                <form action="{% url 'add_avregning_detaljert_digital' artist_id utgivelse.katalognr %}" method="POST">
+                {% csrf_token %}
+                    <td colspan="2"><input class="form-control" type="text" name="kilde1"></td>
+                    <td><input class="form-control" type="number" min="0" name="DLutgivelse1"></td>
+                    <td><input class="form-control" type="number" min="0" name="DLspor1"></td>
+                    <td><input class="form-control" type="number" min="0" name="streams1" required></td>
+                    <td><input class="form-control" type="number" min="0" name="brutto1" required></td>
+            </tr>
+            <tr class="font-weight-bold">
+                <td colspan="2">Sum</td>
+                <td>{{ digital.sum.dl_utgivelse }}</td>
+                <td>{{ digital.sum.dl_spor }}</td>
+                <td>{{ digital.sum.streams }}</td>
+                <td>{{ digital.sum.brutto }} kr</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr class="bg-dark text-light text-center">
+                <th colspan="6">Total</th>
+            </tr>
+            <tr class="table-secondary">
+                <th colspan="2" scope="col">Avregning</th>
+                <th scope="col">DL utgivelse</th>
+                <th scope="col">DL spor</th>
+                <th scope="col">Streams</th>
+                <th scope="col">Brutto</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in total %}
+        {% if t.avregning == 'Totalt' %}
+            <tr class="font-weight-bold">
+        {% else %}    
+            <tr>
+        {% endif %}      
+                <td colspan="2">{{ t.avregning }}</td>
+                <td>{{ t.DL_utgivelse }}</td>
+                <td>{{ t.DL_spor }}</td>
+                <td>{{ t.streams }}</td>
+                <td>{{ t.brutto }} kr</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="collapse" id="formRad">
+        <input type="hidden" name="rader" value="1">
+        <input type="hidden" name="periode" value="{{ periode }}">
+        <input type="submit" class="btn btn-success float-right mb-2" value="Legg til data">
+    
+                    </form>
+                </div>
+</div>
+{% include 'royaltysystem/partials/bottom.html' %}
