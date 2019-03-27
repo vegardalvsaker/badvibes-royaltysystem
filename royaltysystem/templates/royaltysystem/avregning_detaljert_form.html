@@ -5,103 +5,112 @@
 <body>
     {% include 'royaltysystem/partials/navbar.html' %}
         <div class="container">
-            <div class="card">
-                <div class="card-header"><h3>Digital</h3></div>
+            <h3>Legg til detaljert avregningsdata. Velg mellom <small><button class="btn btn-link" data-toggle="collapse" data-target="#collapseDigital" aria-expanded="true" aria-controls="collapseDigital">Digital</button></small>
+                 eller <small><button class="btn btn-link" data-toggle="collapse" data-target="#collapseFysisk" aria-expanded="false" aria-controls="collapseFysisk">Fysisk</button></small></h3>
+            <div id="accordion">
+                <div class="card">
+                    <div class="card-header" id="digitalHeader"><h3><button class="btn btn-link" data-toggle="collapse" data-target="#collapseDigital" aria-expanded="false" aria-controls="collapseDigital">Digital</button></h3></div>
+                    <div id="collapseDigital" class="collapse" aria-labelledby="digitalHeader" data-parent="#accordion">   
+                    
                     <div class="container">
-                        <div class="row">
-                            <form id="digitalForm" action="{% url 'add_avregning_detaljert_digital' artist_id katalognr %}" method="POST">
-                            {% csrf_token %}
-                                <div class="form-row">
-                                    <div class="form-group col-3">
-                                        <label for="periode">Periode</label>
-                                        <input name="periode" class="form-control" id="periode" type="text" minlength="7" maxlength="7">
-                                    </div>
+                            <div class="row"> 
+                                    <form id="digitalForm" action="{% url 'add_avregning_detaljert_digital' artist_id katalognr %}" method="POST">
+                                    {% csrf_token %}
+                                        <div class="form-row">
+                                            <div class="form-group col-3">
+                                                <label for="periode">Periode</label>
+                                                <input name="periode" class="form-control" id="periode" type="text" minlength="7" maxlength="7">
+                                            </div>
 
-                                    <div class="form-group col-3">
-                                            <label for="digitalRader">Rader</label>
-                                            <input name="digitalRader" class="form-control" id="digitalRader" type="number" readonly>
+                                            <div class="form-group col-3">
+                                                    <label for="digitalRader">Rader</label>
+                                                    <input name="digitalRader" class="form-control" id="digitalRader" type="number" readonly>
+                                                </div>
                                         </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-3">
-                                        <label for="kilde">Kilde</label>
-                                        <input type="text" class="form-control" id="kilde" name="kilde1" required>
-                                    </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-3">
+                                                <label for="kilde">Kilde</label>
+                                                <input type="text" class="form-control" id="kilde" name="kilde1" required>
+                                            </div>
 
-                                    <div class="form-group col-3">
-                                        <label for="DLutgivelse">DL utgivelse</label>
-                                        <input type="number" class="form-control" id="DLutgivelse" name="DLutgivelse1" min="0" required>
-                                    </div>
+                                            <div class="form-group col-3">
+                                                <label for="DLutgivelse">DL utgivelse</label>
+                                                <input type="number" class="form-control" id="DLutgivelse" name="DLutgivelse1" min="0" required>
+                                            </div>
 
-                                    <div class="form-group col-3">
-                                        <label for="DLspor">DL spor</label>
-                                        <input type="number" class="form-control" id="DLspor" name="DLspor1" min="0" required>
-                                    </div>
+                                            <div class="form-group col-3">
+                                                <label for="DLspor">DL spor</label>
+                                                <input type="number" class="form-control" id="DLspor" name="DLspor1" min="0" required>
+                                            </div>
 
-                                        <div class="form-group col-3">
-                                            <label for="streams">Streams</label>
-                                            <input type="number" class="form-control" id="streams" name="streams1" min="0" required>
+                                                <div class="form-group col-3">
+                                                    <label for="streams">Streams</label>
+                                                    <input type="number" class="form-control" id="streams" name="streams1" min="0" required>
+                                                </div>
                                         </div>
+                                        <span id="nyDigitalRad">&nbsp;</span>
+                                        <button class="btn btn-sm btn-warning" onclick="nyDigitalRad()">Ny rad</button>
+                                        <div class="form-row"><input class="btn btn-success form-submit pull-right" type="submit" value="Send"></div>
+                                    </form>
                                 </div>
-                                <span id="nyDigitalRad">&nbsp;</span>
-                                <button class="btn btn-sm btn-warning" onclick="nyDigitalRad()">Ny rad</button>
-                                <div class="form-row"><input class="btn btn-success float-right" type="submit" value="Send"></div>
-                            </form>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-            <div class="card mt-3">
-                    <div class="card-header"><h3>Fysisk</h3></div>
-                        <div class="container">
-                            <div class="row">
-                                <form id="fysiskForm" action="{% url 'add_avregning_detaljert_fysisk' artist_id katalognr %}" method="POST">
-                                {% csrf_token %}
-                                    <div class="form-row">
-                                        <div class="form-group col-3">
-                                            <label for="periode">Periode</label>
-                                            <input name="periode" class="form-control" id="periode" type="text" minlength="7" maxlength="7">
-                                        </div>
-    
-                                        <div class="form-group col-3">
-                                                <label for="fysiskRader">Rader</label>
-                                                <input name="rader" class="form-control" id="fysiskRader" type="number" readonly>
+                <div class="card">
+                        <div class="card-header" id="fysiskHeader"><h3><button class="btn btn-link" data-toggle="collapse" data-target="#collapseFysisk" aria-expanded="false" aria-controls="collapseFysisk">Fysisk</button></h3></div>
+                        <div id="collapseFysisk" class="collapse" aria-labelledby="fysiskHeader" data-parent="#accordion">   
+                            <div class="container">
+                                <div class="row">
+                                    <form id="fysiskForm" action="{% url 'add_avregning_detaljert_fysisk' artist_id katalognr %}" method="POST">
+                                    {% csrf_token %}
+                                        <div class="form-row">
+                                            <div class="form-group col-3">
+                                                <label for="periode">Periode</label>
+                                                <input name="periode" class="form-control" id="periode" type="text" minlength="7" maxlength="7">
                                             </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group col-3">
-                                            <label for="kilde">Kilde</label>
-                                            <input type="text" class="form-control" id="kilde" name="kilde1" required>
+        
+                                            <div class="form-group col-3">
+                                                    <label for="fysiskRader">Rader</label>
+                                                    <input name="rader" class="form-control" id="fysiskRader" type="number" readonly>
+                                                </div>
                                         </div>
-    
-                                        <div class="form-group col-3">
-                                            <label for="antall">Antall</label>
-                                            <input type="number" class="form-control" id="antall" name="antall1" min="0" required>
-                                        </div>
-    
-                                        <div class="form-group col-3">
-                                            <label for="inntekter">Inntekter</label>
-                                            <input type="number" class="form-control" id="inntekter" name="inntekter1" min="0" required>
-                                        </div>
-    
-                                        <div class="form-group col-3">
-                                            <label for="kostnader">Kostnader</label>
-                                            <input type="number" class="form-control" id="kostnader" name="kostnader1" min="0" required>
-                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-3">
+                                                <label for="kilde">Kilde</label>
+                                                <input type="text" class="form-control" id="kilde" name="kilde1" required>
+                                            </div>
+        
+                                            <div class="form-group col-3">
+                                                <label for="antall">Antall</label>
+                                                <input type="number" class="form-control" id="antall" name="antall1" min="0" required>
+                                            </div>
+        
+                                            <div class="form-group col-3">
+                                                <label for="inntekter">Inntekter</label>
+                                                <input type="number" class="form-control" id="inntekter" name="inntekter1" min="0" required>
+                                            </div>
+        
+                                            <div class="form-group col-3">
+                                                <label for="kostnader">Kostnader</label>
+                                                <input type="number" class="form-control" id="kostnader" name="kostnader1" min="0" required>
+                                            </div>
 
-                                        <div class="form-group col-3">
-                                            <label for="brutto">Brutto</label>
-                                            <input type="number" class="form-control" id="brutto" name="brutto1" min="0" required>
+                                            <div class="form-group col-3">
+                                                <label for="brutto">Brutto</label>
+                                                <input type="number" class="form-control" id="brutto" name="brutto1" min="0" required>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <span id="nyFysiskRad">&nbsp;</span>
-                                    <button class="btn btn-sm btn-warning" onclick="nyFysiskRad()">Ny rad</button>
-                                    <div class="form-row"><input class="btn btn-success float-right" type="submit" value="Send"></div>
-                                </form>
+                                        <span id="nyFysiskRad">&nbsp;</span>
+                                        <button class="btn btn-sm btn-warning" onclick="nyFysiskRad()">Ny rad</button>
+                                        <div class="form-row"><input class="btn btn-success col-offset-9" type="submit" value="Send"></div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
 {% include 'royaltysystem/partials/bottom.html' %}
 {% load static %}

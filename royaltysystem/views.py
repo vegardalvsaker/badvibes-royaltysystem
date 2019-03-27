@@ -163,7 +163,25 @@ def nyutgivelse(request, artist_id):
             return HttpResponseRedirect(reverse(artist, args=[artist_id]))
     return HttpResponseRedirect(reverse(utgivelse, args=[artist_id, katalognr]))
 
+def add_utgivelse_format(request, artist_id, katalognr):
+    if request.method == "POST":
+        digital = request.POST.get('digital', False)
+        fysisk_format = request.POST.get('fysiskFormat', False)
 
+        ut = Utgivelse.objects.get(pk=katalognr)
+        try:
+            if digital:
+                ut_dig = UtgivelseFormat(format="Digital", utgivelse=ut)
+                ut_dig.save()
+            if fysisk_format:
+                ut_fys = UtgivelseFormat(format="Fysisk", fysisk_format_type=fysisk_format, utgivelse=ut)
+                ut_fys.save()
+            return HttpResponseRedirect(reverse(avregning_detaljert, args=[artist_id, katalognr]))
+        except IntegrityError:
+            messages.error(request, IntegrityError.__cause__)
+            return HttpResponseRedirect(reverse(artist, args=[artist_id]))
+    return HttpResponseRedirect(reverse(artist, args=[artist_id]))
+    
 def utgivelse(request, artist_id, katalognr):
     periode = request.GET.get('periode', False)
     if not periode:
@@ -188,6 +206,8 @@ def utgivelse(request, artist_id, katalognr):
                 }
 
             return render(request, "royaltysystem/velgperiode.html", context)
+        else:
+            return render(request, "royaltysystem/addformat.html", {'artist_id': artist_id, 'utgivelse': ut})
     periode.replace("%20", " ")
     utgivelsen = get_object_or_404(Utgivelse, pk=katalognr)
 

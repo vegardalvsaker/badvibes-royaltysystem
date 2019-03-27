@@ -7,6 +7,36 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 </script>
-<div class="mt-5" style="min-height: 100%; margin-bottom: -100px;"><div class="bg-dark" style="height: 100px"><p class="text-light text-center" style="padding-top: 20px;">This page is developed by <a href="https://github.com/vegardalvsaker">Vegard Alvsaker</a> and is licensed under the GPL.<br>Source code is available <a href="https://github.com/vegardalvsaker/badvibes-royaltysystem/">here</a></p></div></div>
+   <style>
+      html {
+        height: 100%;
+      }
+      body {
+        min-height: 100%;
+        position: relative;
+      }
+      body::after {
+        content: '';
+        display: block;
+        height: 100px;
+        margin-top: 20px;
+      }
+       img {
+         width: auto;
+         height: 500px;
+       }
+       .container {
+         border-color: #282828 !important;
+         border-width: 2px !important;
+       }
+       #footer {
+         height: 100px;
+         margin-top: 20px;
+         width: 100%;
+         bottom: 0;
+         position: absolute;
+       }
+       </style>
+<div class="bg-dark" id="footer"><p class="text-light text-center" style="padding-top: 20px;">This page is developed by <a href="https://github.com/vegardalvsaker">Vegard Alvsaker</a> and is licensed under the GPL.<br>Source code is available <a href="https://github.com/vegardalvsaker/badvibes-royaltysystem/">here</a></p></div>
 </body>
 </html>
