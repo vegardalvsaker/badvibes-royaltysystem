@@ -31,7 +31,7 @@
         {% if artist_list %}
         <div class="row">
         {% for artist in artist_list %}
-            <a class="btn col-6 text-left mb-2" href="{% url 'artist' artist.id %}">{{ artist.name }} contract since: {{ artist.contract_since }} <span data-toggle="tooltip" data-placement="top" title="Antall utgivelser" class="badge badge-secondary">4</span></a>
+            <a class="btn col-6 text-left mb-2" href="{% url 'artist' artist.id %}">{{ artist.name }} contract since: {{ artist.contract_since }} <span data-toggle="tooltip" data-placement="top" title="Antall utgivelser" class="badge badge-secondary">{{ artist.utgivelser }}</span></a>
         {% endfor %}
         </div>
     {% else %}

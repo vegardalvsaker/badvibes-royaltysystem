@@ -15,6 +15,8 @@ PERIODS = Periode.objects.all()
 def index(request):
     template_name = 'royaltysystem/index.html'
     artist_list = Artist.objects.all()
+    for i, a in enumerate(artist_list):
+        a.utgivelser = len(Utgivelse.objects.filter(artist=a))
     context = {
         'artist_list': artist_list
     }
@@ -39,6 +41,18 @@ def add_artist(request):
 def artist(request, artist_id):
     art = get_object_or_404(Artist, pk=artist_id)
     art.utgivelser = []
+    artist_sum = {  'akkumulert': {
+                                    'brutto': 0,
+                                    'kostnader': 0,
+                                    'nettoinntekt': 0 
+                                    },
+                    'totalt': {     'brutto': 0,
+                                    'kostnader': 0,
+                                    'nettoinntekt': 0,
+                                    'labelcut': 0
+                    }
+                }
+    art.sum = artist_sum
     for i, ut in enumerate(art.utgivelse_set.all()):
         ut.avregninger = []
         ut.totalt = {}
@@ -77,19 +91,29 @@ def artist(request, artist_id):
                     avregning.labelcut      = avregning.bruttoinntekt - avregning.nettoinntekt
                 avregning.nettoinntekt_akkumulert   = round(avregning.nettoinntekt + ut.avregninger[j-1].nettoinntekt_akkumulert, 2)
 
-            ##Kalkulerer totalt-raden
             ut.avregninger.append(avregning)
-            ut.totalt['bruttoinntekt']              = sum(filter(None, (a.bruttoinntekt for a in ut.avregninger)))
-            ut.totalt['bruttoinntekt_akkumulert']   = kalkuler_akkumulert_when_utbetalt(ut.avregninger, 'bruttoinntekt_akkumulert')
-            ut.totalt['kostnader']                  = sum(filter(None, (a.kostnader for a in ut.avregninger)))
-            ut.totalt['kostnader_akkumulert']       = kalkuler_akkumulert_when_utbetalt(ut.avregninger, 'kostnader_akkumulert')
-            ut.totalt['nettoinntekt']               = sum(filter(None,(a.nettoinntekt for a in ut.avregninger)))
-            ut.totalt['nettoinntekt_akkumulert']    = kalkuler_akkumulert_when_utbetalt(ut.avregninger, 'nettoinntekt_akkumulert')
-            ut.totalt['labelcut']                   = sum(filter(None, (a.labelcut for a in ut.avregninger)))
-            if j == 0:
-                messages.warning(request, 'Ingen data registrert på denne utgivelsen')
-        art.utgivelser.append(ut)
+        ##Kalkulerer totalt-raden
+        ut.totalt['bruttoinntekt']              = sum(filter(None, (a.bruttoinntekt for a in ut.avregninger)))
+        ut.totalt['bruttoinntekt_akkumulert']   = kalkuler_akkumulert_when_utbetalt(ut.avregninger, 'bruttoinntekt_akkumulert')
+        ut.totalt['kostnader']                  = sum(filter(None, (a.kostnader for a in ut.avregninger)))
+        ut.totalt['kostnader_akkumulert']       = kalkuler_akkumulert_when_utbetalt(ut.avregninger, 'kostnader_akkumulert')
+        ut.totalt['nettoinntekt']               = sum(filter(None,(a.nettoinntekt for a in ut.avregninger)))
+        ut.totalt['nettoinntekt_akkumulert']    = kalkuler_akkumulert_when_utbetalt(ut.avregninger, 'nettoinntekt_akkumulert')
+        ut.totalt['labelcut']                   = sum(filter(None, (a.labelcut for a in ut.avregninger)))
+       
+        art.sum['totalt']['brutto'] += ut.totalt['bruttoinntekt']
+        art.sum['akkumulert']['brutto'] += ut.totalt['bruttoinntekt_akkumulert']
 
+        art.sum['totalt']['kostnader'] += ut.totalt['kostnader']
+        art.sum['akkumulert']['kostnader'] += ut.totalt['kostnader_akkumulert']
+
+        art.sum['totalt']['nettoinntekt'] += ut.totalt['nettoinntekt']
+        art.sum['akkumulert']['nettoinntekt'] += ut.totalt['nettoinntekt_akkumulert']
+
+        art.sum['totalt']['labelcut'] += ut.totalt['labelcut']
+            
+        art.utgivelser.append(ut)
+    
     context = {
         'artist': art
     }
@@ -149,8 +173,6 @@ def add_avregning_detaljert_fysisk(request, artist_id, katalognr):
         avreg_detalj.save()
     
     return HttpResponseRedirect(reverse(utgivelse, args=[artist_id, katalognr]))
-
-
 
 def nyutgivelse(request, artist_id):
     if request.method == "POST":
@@ -288,7 +310,6 @@ def utgivelse(request, artist_id, katalognr):
         context['total'] = total
         return render(request, 'royaltysystem/utgivelse.html/', context)
     return render(request, "royaltysystem/utgivelse_feil.html", {})
-
 
 def get_total_fysisk(fysisk_format, periode):
     fysisk_whole_list = fysisk_format.avregning_detaljert_set.all()

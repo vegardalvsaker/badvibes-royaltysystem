@@ -73,6 +73,7 @@
                         {% endif %}
                     </tr>
                     {% endfor %}
+                    <!--Totalt-raden for hver utgivelse-->
                     <tr class="font-weight-bold">
                         <td class="totalt">Totalt</td>
                         <td class="totalt">{{ utgivelse.totalt.bruttoinntekt }} kr</td>
@@ -86,12 +87,41 @@
                     </tr>
                 </tbody>
                 {% endfor %}
+                <!--Sum-delen for hele utgivelseskatalogen til artisten-->
+                <thead>
+                    <tr class="bg-dark text-light text-center">
+                        <th colspan="9" class="text-center"> Sum </th>
+                    </tr>
+                    <tr class="table-secondary ">
+                        <th class="headerDivider" scope="col">Type</th>
+                        <th class="headerDivider" scope="col">Bruttoinntekt</th>
+                        <th class="headerDivider" colspan="3" scope="col">Kostnader</th>
+                        <th class="headerDivider" colspan="3" scope="col">Nettoinntekt</th>
+                        <th class="headerDivider" scope="col">Label cut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="font-weight-bold">
+                        <td colspan="1">Akkumulert</td>
+                        <td colspan="1">{{ artist.sum.akkumulert.brutto }} kr</td>
+                        <td colspan="3">{{ artist.sum.akkumulert.kostnader }} kr</td>
+                        <td colspan="3">{{ artist.sum.akkumulert.nettoinntekt }} kr</td>
+                        <td colspan="1">-</td>
+                    </tr>
+                    <tr>
+                        <td class="totalt">Totalt</td>
+                        <td class="totalt">{{ artist.sum.totalt.brutto }} kr</td>
+                        <td class="totalt" colspan="3">{{ artist.sum.totalt.kostnader }} kr</td>
+                        <td class="totalt" colspan="3">{{ artist.sum.totalt.nettoinntekt }} kr</td>
+                        <td class="totalt">{{ artist.sum.totalt.labelcut }} kr</td>
+                    </tr>
+                </tbody>
             </table>
             {% else %}
             <div class="collapse" id="ingenUtgivelserWarning">
             <h3 class="text-center text-warning">Ingen utgivelser registrert for denne artisten</h3></div>
             {% endif %} 
-            <div class="collapse" id="ingenUtgivelserWarningLink"><a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Legg til</h5></a></div>
+            <div class="collapse" id="ingenUtgivelserWarningLink"><a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Ny utgivelse</h5></a></div>
             <!--<img class="text-center" src="{% static 'royaltysystem/icons/plus.svg' %}" style="height: 25px;">-->
             <div class="collapse" id="addUtgivelseCollapse">
                 <div class="card">
