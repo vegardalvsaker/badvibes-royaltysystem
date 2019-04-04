@@ -97,7 +97,18 @@ def artist(request, artist_id):
     return render(request, 'royaltysystem/artist.html', context)
 
 def avregning_detaljert(request, artist_id, katalognr):
+    
+    digital = True
+    fysisk = True
+
+    try:
+        UtgivelseFormat.objects.get(utgivelse=katalognr, format="Fysisk")
+    except UtgivelseFormat.DoesNotExist:
+        fysisk = False
+
     context = {
+        'digital': digital,
+        'fysisk': fysisk,
         'artist_id': artist_id,
         'katalognr': katalognr
     }

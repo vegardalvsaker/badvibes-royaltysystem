@@ -91,7 +91,7 @@
             <div class="collapse" id="ingenUtgivelserWarning">
             <h3 class="text-center text-warning">Ingen utgivelser registrert for denne artisten</h3></div>
             {% endif %} 
-            <div class="collapse" id="ingenUtgivelserWarning"><a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Legg til</h5></a></div>
+            <div class="collapse" id="ingenUtgivelserWarningLink"><a class="text-center" data-toggle="collapse" href="#addUtgivelseCollapse" role="button" aria-expanded="false" aria-controls="addUtgivelseCollapse"><h5>Legg til</h5></a></div>
             <!--<img class="text-center" src="{% static 'royaltysystem/icons/plus.svg' %}" style="height: 25px;">-->
             <div class="collapse" id="addUtgivelseCollapse">
                 <div class="card">
@@ -163,5 +163,8 @@
 <script>
     $( document ).ready(function() {
           
-        setTimeout(() => { $('#ingenUtgivelserWarning').collapse('show') }, 600);
+        setTimeout(() => { 
+            $('#ingenUtgivelserWarning').collapse('show');
+            $('#ingenUtgivelserWarningLink').collapse('show');
+     }, 600);
     });</script>

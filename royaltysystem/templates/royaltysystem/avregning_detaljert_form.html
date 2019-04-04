@@ -6,7 +6,7 @@
     {% include 'royaltysystem/partials/navbar.html' %}
         <div class="container">
             <h3>Legg til detaljert avregningsdata. Velg mellom <small><button class="btn btn-link" data-toggle="collapse" data-target="#collapseDigital" aria-expanded="true" aria-controls="collapseDigital">Digital</button></small>
-                 eller <small><button class="btn btn-link" data-toggle="collapse" data-target="#collapseFysisk" aria-expanded="false" aria-controls="collapseFysisk">Fysisk</button></small></h3>
+                 eller <small><button class="btn btn-link {% if not fysisk %} disabled {% endif %}" data-toggle="collapse" data-target="#collapseFysisk" aria-expanded="false" aria-controls="collapseFysisk">Fysisk</button></small></h3>
             <div id="accordion">
                 <div class="card">
                     <div class="card-header" id="digitalHeader"><h3><button class="btn btn-link" data-toggle="collapse" data-target="#collapseDigital" aria-expanded="false" aria-controls="collapseDigital">Digital</button></h3></div>
@@ -58,7 +58,7 @@
                     </div>
 
                 <div class="card">
-                        <div class="card-header" id="fysiskHeader"><h3><button class="btn btn-link" data-toggle="collapse" data-target="#collapseFysisk" aria-expanded="false" aria-controls="collapseFysisk">Fysisk</button></h3></div>
+                        <div class="card-header" id="fysiskHeader"><h3><button class="btn btn-link {% if not fysisk %} disabled {% endif%}" data-toggle="collapse" data-target="#collapseFysisk" aria-expanded="false" aria-controls="collapseFysisk">Fysisk</button></h3></div>
                         <div id="collapseFysisk" class="collapse" aria-labelledby="fysiskHeader" data-parent="#accordion">   
                             <div class="container">
                                 <div class="row">
