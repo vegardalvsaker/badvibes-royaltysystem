@@ -63,3 +63,19 @@ class Avregning(models.Model):
 
     def __str__(self):
         return "Avregning for " + self.utgivelse.__str__() + " - " + self.periode.__str__()
+
+class Utbetaling(models.Model):
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    periode_fra = models.ForeignKey(Periode, on_delete=models.CASCADE)
+    periode_til = models.ForeignKey(Periode, null=True, blank=True, related_name="periodespenn_til", on_delete=models.CASCADE)
+    royalties = models.DecimalField(max_digits=10, decimal_places=2)
+    referanse = models.CharField(max_length=6, blank=True, null=True)
+    dato = models.DateField()
+    annet = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        if self.referanse:
+            return "Utbetalingsinformasjon til " + self.artist.__str__() + " | ref: " + self.referanse
+        else:
+            return "Utbetalingsinformasjon til " + self.artist.__str__() + " | ref: <blank>"
+

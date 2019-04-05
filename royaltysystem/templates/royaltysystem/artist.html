@@ -116,6 +116,35 @@
                         <td class="totalt">{{ artist.sum.totalt.labelcut }} kr</td>
                     </tr>
                 </tbody>
+                <thead>
+                    <tr class="bg-dark text-light text-center">
+                        <th colspan="9">Utbetalinger</th>
+                    </tr>
+                    <tr class="table-secondary">
+                        <th class="headerDivider" scope="col" colspan="2">Periodespenn</th>
+                        <th class="headerDivider" scope="col" colspan="2">Opptjente royalties</th>
+                        <th class="headerDivider" scope="col" colspan="1">Referanse</th>
+                        <th class="headerDivider" scope="col" colspan="1">Dato</th>
+                        <th class="headerDivider" scope="col" colspan="3">Annet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for utb in artist.utbetaling_set.all %}
+                    <tr>
+                        {% if utb.periode_til %}
+                        <td colspan="2">{{ utb.periode_fra }} - {{ utb.periode_til }}</td>
+                        {% else %}
+                        <td colspan="2">{{ utb.periode_fra }} </td>
+                        {% endif%}
+                        <td colspan="2">{{ utb.royalties }}</td>
+                        <td colspan="1">{% if utb.referanse %} {{ utb.referanse }} {% endif %}</td>
+                        <td colspan="1">{{ utb.dato }}</td>
+                        <td colspan="3">{% if utb.annet %} {{ utb.annet }} {% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                
+                
             </table>
             {% else %}
             <div class="collapse" id="ingenUtgivelserWarning">

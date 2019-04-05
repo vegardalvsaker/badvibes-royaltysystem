@@ -41,7 +41,7 @@ def add_artist(request):
 def artist(request, artist_id):
     art = get_object_or_404(Artist, pk=artist_id)
     art.utgivelser = []
-    artist_sum = {  'akkumulert': {
+    art.sum = {  'akkumulert': {
                                     'brutto': 0,
                                     'kostnader': 0,
                                     'nettoinntekt': 0 
@@ -52,7 +52,7 @@ def artist(request, artist_id):
                                     'labelcut': 0
                     }
                 }
-    art.sum = artist_sum
+    
     for i, ut in enumerate(art.utgivelse_set.all()):
         ut.avregninger = []
         ut.totalt = {}
