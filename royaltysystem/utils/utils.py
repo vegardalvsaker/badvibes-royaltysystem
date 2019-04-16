@@ -3,7 +3,10 @@ import pdb
 PERIODS = Periode.objects.all()
 
 def kalkuler_akkumulert_when_utbetalt(avregninger, attribute):
-    return getattr(avregninger[len(avregninger)-1], attribute, False)
+    if len(avregninger) > 0:
+        return getattr(avregninger[len(avregninger)-1], attribute, False)
+    else:
+        return 0
         
 
 def kalkuler_fysisk_sum(fysisk_liste):

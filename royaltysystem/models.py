@@ -31,6 +31,9 @@ class UtgivelseFormat(models.Model):
     fysisk_format_type = models.CharField(blank=True, max_length=20)
     utgivelse = models.ForeignKey(Utgivelse, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('format', 'utgivelse')
+
     def __str__(self):
         if self.fysisk_format_type:
             return self.utgivelse.__str__() + " "+ self.format + " ["+ self.fysisk_format_type+"]"

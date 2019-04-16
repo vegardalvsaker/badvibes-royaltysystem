@@ -33,24 +33,32 @@
                                                 <input type="text" class="form-control" id="kilde" name="kilde1" required>
                                             </div>
 
-                                            <div class="form-group col-3">
+                                            <div class="form-group col-2">
                                                 <label for="DLutgivelse">DL utgivelse</label>
                                                 <input type="number" class="form-control" id="DLutgivelse" name="DLutgivelse1" min="0" required>
                                             </div>
 
-                                            <div class="form-group col-3">
+                                            <div class="form-group col-2">
                                                 <label for="DLspor">DL spor</label>
                                                 <input type="number" class="form-control" id="DLspor" name="DLspor1" min="0" required>
                                             </div>
 
-                                                <div class="form-group col-3">
-                                                    <label for="streams">Streams</label>
-                                                    <input type="number" class="form-control" id="streams" name="streams1" min="0" required>
-                                                </div>
+                                            <div class="form-group col-2">
+                                                <label for="streams">Streams</label>
+                                                <input type="number" class="form-control" id="streams" name="streams1" min="0" required>
+                                            </div>
+
+                                            <div class="form-group col-2">
+                                                <label for="brutto">Brutto</label>
+                                                <input type="number" class="form-control" id="brutto" name="brutto1" min="0" step="any" required>
+                                            </div>
                                         </div>
+                                        <!-- Where new rows will be appended -->
+                                        
                                         <span id="nyDigitalRad">&nbsp;</span>
-                                        <button class="btn btn-sm btn-warning" onclick="nyDigitalRad()">Ny rad</button>
+                                        
                                         <div class="form-row"><input class="btn btn-success form-submit pull-right" type="submit" value="Send"></div>
+                                        <button type="button" class="btn btn-sm btn-warning" onclick="nyDigitalRad()">Ny rad</button>
                                     </form>
                                 </div>
                             </div>
@@ -98,7 +106,7 @@
 
                                             <div class="form-group col-3">
                                                 <label for="brutto">Brutto</label>
-                                                <input type="number" class="form-control" id="brutto" name="brutto1" min="0" required>
+                                                <input type="number" class="form-control" id="brutto" name="brutto1" min="0" step="any" required>
                                             </div>
                                         </div>
                                         <span id="nyFysiskRad">&nbsp;</span>

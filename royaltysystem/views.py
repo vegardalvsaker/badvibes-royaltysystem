@@ -141,7 +141,7 @@ def avregning_detaljert(request, artist_id, katalognr):
 def add_avregning_detaljert_digital(request, artist_id, katalognr):
     p = request.POST.get('periode')
     periode = Periode.objects.get_or_create(periode=p)[0]
-    rader = int(request.POST.get('rader'))
+    rader = int(request.POST.get('digitalRader'))
     utgivelse_format = UtgivelseFormat.objects.get(utgivelse=katalognr, format='Digital')
     
     for i in range (1, rader+1):
@@ -159,7 +159,7 @@ def add_avregning_detaljert_digital(request, artist_id, katalognr):
 def add_avregning_detaljert_fysisk(request, artist_id, katalognr):
     p = request.POST.get('periode')
     periode = Periode.objects.get_or_create(periode=p)[0]
-    rader = int(request.POST.get('rader'))
+    rader = int(request.POST.get('fysiskRader'))
     utgivelse_format = UtgivelseFormat.objects.get(utgivelse=katalognr, format='Fysisk')
     
     for i in range (1, rader+1):
